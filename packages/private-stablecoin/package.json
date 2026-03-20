@@ -1,0 +1,7 @@
+{
+  "name": "@galactica-net/overcast-private-stablecoin",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Aztec Noir token contract for private, compliance-aware transfers (AIP-20-style extensions planned)."
+}

@@ -1,0 +1,7 @@
+{
+  "name": "@galactica-net/overcast-stablecoin-wrapper",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Solidity L1 contracts for wrapping public stablecoins (portal / escrow) ahead of private settlement on Aztec."
+}

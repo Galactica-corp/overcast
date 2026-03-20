@@ -1,0 +1,7 @@
+{
+  "name": "@galactica-net/overcast-token-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Infrastructure to move wrapped stablecoin value from Ethereum into Aztec privately, aligned with Aztec token bridge patterns."
+}

@@ -8,11 +8,40 @@
 
 **Foundations:** this repository is expected to combine **EVM smart contracts** (portals, messaging, public-side escrow and coordination), **Aztec private execution and Noir contracts** (including extensions around the **AIP-20** token model and RWA-oriented controls inspired by standards such as **CMTA**), and **Galactica’s ZK KYC / Identity stack** on Aztec (guardian-led attestations, proofs, and disclosure modules as described in the project docs).
 
+Protocol detail: [`docs/overcast_protocol_architecture.md`](docs/overcast_protocol_architecture.md), [`docs/private_stablecoin_working_doc.md`](docs/private_stablecoin_working_doc.md).
+
+### Monorepo packages
+
+| Package | Path | Role |
+|--------|------|------|
+| `@galactica-net/overcast-stablecoin-wrapper` | [`packages/stablecoin-wrapper`](packages/stablecoin-wrapper) | Solidity L1 wrapping / portal-style contracts |
+| `@galactica-net/overcast-token-bridge` | [`packages/token-bridge`](packages/token-bridge) | Ethereum → Aztec private bridge infrastructure |
+| `@galactica-net/overcast-private-stablecoin` | [`packages/private-stablecoin`](packages/private-stablecoin) | Noir token on Aztec (private + compliant transfers) |
+
 ---
 
 ## Installation
 
-*To be added as the toolchain is pinned (e.g. Node, Aztec sandbox, Foundry/Hardhat, Noir compiler versions).*
+This repository uses **[Yarn 4](https://yarnpkg.com/)** (Berry). The required version is declared in root `package.json` as `packageManager` for [Corepack](https://nodejs.org/api/corepack.html).
+
+1. **Node.js** — use a current LTS release (18+ or 20+ recommended).
+2. **Enable Corepack** (ships with Node 16.10+):
+
+   ```bash
+   corepack enable
+   ```
+
+3. **Clone** the repo and **install** from the root (Corepack will pick up Yarn 4 from `packageManager`):
+
+   ```bash
+   git clone https://github.com/Galactica-corp/overcast.git
+   cd overcast
+   yarn install
+   ```
+
+If Corepack is disabled or Yarn does not match the repo, run `yarn set version 4` once in the project root, then `yarn install` again.
+
+Per-package toolchains (Foundry, Nargo, Aztec sandbox, etc.) will be documented under each `packages/*` workspace as they are added.
 
 ---
 
