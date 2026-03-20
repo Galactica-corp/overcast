@@ -12,10 +12,10 @@ Protocol detail: [`docs/overcast_protocol_architecture.md`](docs/overcast_protoc
 
 ### Monorepo packages
 
-| Package | Path | Role |
-|--------|------|------|
-| `@galactica-net/overcast-stablecoin-wrapper` | [`packages/stablecoin-wrapper`](packages/stablecoin-wrapper) | Solidity L1 wrapping / portal-style contracts |
-| `@galactica-net/overcast-token-bridge` | [`packages/token-bridge`](packages/token-bridge) | Ethereum → Aztec private bridge infrastructure |
+| Package                                      | Path                                                         | Role                                                |
+| -------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------- |
+| `@galactica-net/overcast-stablecoin-wrapper` | [`packages/stablecoin-wrapper`](packages/stablecoin-wrapper) | Solidity L1 wrapping / portal-style contracts       |
+| `@galactica-net/overcast-token-bridge`       | [`packages/token-bridge`](packages/token-bridge)             | Ethereum → Aztec private bridge infrastructure      |
 | `@galactica-net/overcast-private-stablecoin` | [`packages/private-stablecoin`](packages/private-stablecoin) | Noir token on Aztec (private + compliant transfers) |
 
 ---
@@ -43,14 +43,19 @@ If Corepack is disabled or Yarn does not match the repo, run `yarn set version 4
 
 Per-package toolchains (Foundry, Nargo, Aztec sandbox, etc.) will be documented under each `packages/*` workspace as they are added.
 
+### Development setup
+
+- **Lint & format (Node / shared files):** from the repo root, run `yarn lint` (ESLint + Prettier check) and `yarn format` to apply Prettier. Solidity and Noir use their own tools as well—see [`docs/linting.md`](docs/linting.md).
+- **AI / agent tooling:** install the **Aztec** and **Noir** MCP servers for editors that support MCP (code search, docs, examples, version-aware context). Follow Aztec’s guide: **[AI tooling — MCP servers](https://docs.aztec.network/developers/ai_tooling#mcp-servers)**. Repository-level guidance for humans and agents lives in [`AGENTS.md`](AGENTS.md).
+
 ---
 
 ## Testing
 
-*To be added once unit, integration, and network tests are wired up.*
+_To be added once unit, integration, and network tests are wired up._
 
 ---
 
 ## Deployment
 
-*To be added for target environments (local devnet, testnet, production) and contract/circuit deployment steps.*
+_To be added for target environments (local devnet, testnet, production) and contract/circuit deployment steps._

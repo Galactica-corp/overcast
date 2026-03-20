@@ -1,0 +1,21 @@
+# Dependencies & tooling
+node_modules
+.yarn
+.pnp.*
+
+# Generated / vendor
+coverage
+dist
+build
+out
+cache
+artifacts
+typechain-types
+
+# Lockfiles (machine-generated)
+yarn.lock
+
+# Noir / Aztec build outputs (when present)
+target
+proofs
+*.proof
