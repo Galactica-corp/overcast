@@ -47,7 +47,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/private-stablecoin/**/*.ts'],
+    files: [
+      'packages/private-stablecoin/**/*.ts',
+      'packages/stablecoin-wrapper/**/*.ts',
+    ],
     extends: [tseslint.configs.recommended],
   },
 );

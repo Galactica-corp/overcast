@@ -19,7 +19,7 @@
     "@types/node": "^22.8.5",
     "forge-std": "foundry-rs/forge-std#v1.9.4",
     "hardhat": "^3.2.0",
-    "typescript": "~5.8.0",
+    "typescript": "^5.9.3",
     "viem": "^2.43.0"
   }
 }

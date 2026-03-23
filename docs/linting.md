@@ -6,7 +6,7 @@ The monorepo uses **layered** tooling so each language keeps its native linter/f
 
 | Tool     | Role                                                                                         |
 | -------- | -------------------------------------------------------------------------------------------- |
-| ESLint   | Lint for `.js`, `.mjs`, `.cjs` and `packages/private-stablecoin/**/*.ts` (typescript-eslint) |
+| ESLint   | Lint for `.js`, `.mjs`, `.cjs`, `packages/private-stablecoin/**/*.ts`, and `packages/stablecoin-wrapper/**/*.ts` (typescript-eslint) |
 | Prettier | Format JSON, Markdown, YAML, and JS/TS                                                       |
 
 From the repository root:
@@ -18,9 +18,9 @@ yarn format        # Prettier write
 yarn format:check  # Prettier check only
 ```
 
-### `packages/private-stablecoin` (Aztec / TypeScript)
+### TypeScript workspaces
 
-TypeScript in that workspace is linted by the root ESLint config. Useful commands:
+TypeScript under `packages/private-stablecoin/` and `packages/stablecoin-wrapper/` is linted by the root ESLint config. Useful commands:
 
 ```bash
 yarn workspace @galactica-net/overcast-private-stablecoin compile
@@ -32,13 +32,14 @@ Shorter aliases from the repo root: `yarn compile:private-stablecoin`, `yarn cod
 
 Opt-in Aztec Jest E2E (requires a running local network): `yarn test:private-stablecoin:e2e` (sets `RUN_AZTEC_E2E=1`). Default `yarn test:js` skips that suite.
 
-Add new TypeScript under `packages/private-stablecoin/` (or extend the ESLint `files` glob in [`eslint.config.mjs`](../eslint.config.mjs) if you introduce TS elsewhere).
+Add new TypeScript under either workspace, or extend the ESLint `files` glob in [`eslint.config.mjs`](../eslint.config.mjs) if you introduce TS elsewhere.
 
 ## Solidity (`packages/stablecoin-wrapper`, future EVM packages)
 
 | Tool     | Role                                                     |
 | -------- | -------------------------------------------------------- |
 | Solhint  | Solidity style and safety                                |
+| ESLint   | Lint Hardhat config, scripts, tests, and Ignition modules |
 | Prettier | Optional later via `prettier-plugin-solidity` for `.sol` |
 
 Root config: [`.solhint.json`](../.solhint.json) (shared baseline). When contracts exist (or anytime—no-op if there are no `.sol` files yet):
