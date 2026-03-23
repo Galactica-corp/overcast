@@ -3,5 +3,23 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Solidity L1 contracts for wrapping public stablecoins (portal / escrow) ahead of private settlement on Aztec."
+  "description": "Solidity L1 contracts for wrapping public stablecoins (portal / escrow) ahead of private settlement on Aztec.",
+  "type": "module",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ignition": "^3.1.0",
+    "@nomicfoundation/hardhat-ignition-viem": "^3.1.0",
+    "@nomicfoundation/hardhat-keystore": "^3.0.5",
+    "@nomicfoundation/hardhat-network-helpers": "^3.0.4",
+    "@nomicfoundation/hardhat-node-test-runner": "^3.0.12",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.3",
+    "@nomicfoundation/hardhat-verify": "^3.0.12",
+    "@nomicfoundation/hardhat-viem": "^3.0.4",
+    "@nomicfoundation/hardhat-viem-assertions": "^3.0.7",
+    "@nomicfoundation/ignition-core": "^3.1.0",
+    "@types/node": "^22.8.5",
+    "forge-std": "foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.2.0",
+    "typescript": "~5.8.0",
+    "viem": "^2.43.0"
+  }
 }
