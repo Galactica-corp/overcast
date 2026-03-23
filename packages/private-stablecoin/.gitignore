@@ -1,0 +1,11 @@
+target/
+src/artifacts/
+log/
+.DS_Store
+codegenCache.json
+store/
+.tsbuildinfo
+.env
+.include-code-cache/
+
+dest/

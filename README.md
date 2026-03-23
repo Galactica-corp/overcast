@@ -1,5 +1,7 @@
 # Overcast
 
+Project site: **[overcast.fi](https://overcast.fi/)**
+
 ## Introduction
 
 **Overcast** is a privacy-first stablecoin and settlement protocol on [Aztec](https://aztec.network/). It targets **private, compliant** value transfer and commerce: balances and payment metadata stay off public ledgers, while **ZK-based identity and compliance** (KYC/KYB, selective disclosure, auditability when policy requires it) are enforced inside the private execution layer—not bolted on as opaque off-chain policy alone.

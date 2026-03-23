@@ -3,5 +3,52 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Aztec Noir token contract for private, compliance-aware transfers (AIP-20-style extensions planned)."
+  "type": "module",
+  "description": "Aztec Noir token contract for private, compliance-aware transfers (forked from Aztec private_token_contract).",
+  "scripts": {
+    "clean": "rm -rf ./src/artifacts ./target ./codegenCache.json",
+    "clear-store": "rm -rf ./store",
+    "codegen": "aztec codegen target --outdir src/artifacts",
+    "compile:deps": "(cd ../generic_proxy && aztec compile) && mkdir -p target && cp ../generic_proxy/target/generic_proxy-GenericProxy.json target/",
+    "compile": "aztec compile && yarn compile:deps",
+    "deploy": "NODE_NO_WARNINGS=1 yarn node --loader ts-node/esm scripts/deploy_contract.ts",
+    "deploy::devnet": "NODE_NO_WARNINGS=1 AZTEC_ENV=devnet yarn node --loader ts-node/esm scripts/deploy_contract.ts",
+    "test": "yarn test:js && yarn test:nr",
+    "test::devnet": "AZTEC_ENV=devnet yarn test:js",
+    "test:js": "rm -rf store/pxe && NODE_NO_WARNINGS=1 NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --no-cache --runInBand --config jest.integration.config.json",
+    "test:nr": "aztec test"
+  },
+  "dependencies": {
+    "@aztec/accounts": "4.1.0-rc.4",
+    "@aztec/aztec.js": "4.1.0-rc.4",
+    "@aztec/constants": "4.1.0-rc.4",
+    "@aztec/entrypoints": "4.1.0-rc.4",
+    "@aztec/foundation": "4.1.0-rc.4",
+    "@aztec/noir-contracts.js": "4.1.0-rc.4",
+    "@aztec/protocol-contracts": "4.1.0-rc.4",
+    "@aztec/pxe": "4.1.0-rc.4",
+    "@aztec/stdlib": "4.1.0-rc.4",
+    "@aztec/wallet-sdk": "4.1.0-rc.4",
+    "@aztec/wallets": "4.1.0-rc.4",
+    "dotenv": "^17.2.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^22.15.1",
+    "jest": "^29.7.0",
+    "jest-util": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.4"
+  },
+  "jest": {
+    "testTimeout": 200000
+  },
+  "config": {
+    "aztecVersion": "4.1.0-rc.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

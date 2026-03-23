@@ -19,3 +19,7 @@ yarn.lock
 target
 proofs
 *.proof
+
+# Aztec PXE / codegen (private-stablecoin)
+store
+codegenCache.json

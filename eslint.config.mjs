@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import tseslint from 'typescript-eslint';
 
 /** Enough for Node scripts without pulling `eslint-plugin-n` yet */
 const nodeGlobals = {
@@ -19,7 +20,7 @@ const nodeGlobals = {
  * - Solidity: use `yarn lint:solidity` (Solhint) in this repo.
  * - Noir: use `nargo fmt` / Aztec CLI; ESLint does not apply to `.nr` files.
  */
-export default [
+export default tseslint.config(
   {
     ignores: [
       '**/.pnp.cjs',
@@ -45,8 +46,8 @@ export default [
       globals: nodeGlobals,
     },
   },
-  // When TypeScript workspaces land, extend with typescript-eslint, e.g.:
-  // import tseslint from 'typescript-eslint';
-  // ...tseslint.configs.recommended,
-  // { files: ['**/*.{ts,tsx}'], ... }
-];
+  {
+    files: ['packages/private-stablecoin/**/*.ts'],
+    extends: [tseslint.configs.recommended],
+  },
+);
