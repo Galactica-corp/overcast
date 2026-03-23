@@ -11,8 +11,8 @@
     "codegen": "aztec codegen target --outdir src/artifacts",
     "compile:deps": "(cd ../generic_proxy && aztec compile) && mkdir -p target && cp ../generic_proxy/target/generic_proxy-GenericProxy.json target/",
     "compile": "aztec compile && yarn compile:deps",
-    "deploy": "NODE_NO_WARNINGS=1 yarn node --loader ts-node/esm scripts/deploy_contract.ts",
-    "deploy::devnet": "NODE_NO_WARNINGS=1 AZTEC_ENV=devnet yarn node --loader ts-node/esm scripts/deploy_contract.ts",
+    "deploy": "NODE_NO_WARNINGS=1 yarn exec tsx scripts/deploy_contract.ts",
+    "deploy::devnet": "NODE_NO_WARNINGS=1 AZTEC_ENV=devnet yarn exec tsx scripts/deploy_contract.ts",
     "test": "yarn test:js && yarn test:nr",
     "test::devnet": "AZTEC_ENV=devnet yarn test:js",
     "test:js": "rm -rf store/pxe && NODE_NO_WARNINGS=1 NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --no-cache --runInBand --config jest.integration.config.json",
@@ -40,6 +40,7 @@
     "jest-util": "^29.7.0",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.4.4"
   },
   "jest": {
