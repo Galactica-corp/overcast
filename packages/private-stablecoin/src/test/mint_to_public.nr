@@ -3,7 +3,7 @@ use crate::{test::utils, PrivateStablecoin};
 #[test]
 unconstrained fn mint_to_public_success() {
     // Setup without account contracts. We are not using authwits here, so dummy accounts are enough
-    let (mut env, token_contract_address, owner, _, minter) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, owner, _, minter, admin) = utils::setup_with_minter(false);
 
     let token = PrivateStablecoin::at(token_contract_address);
 
@@ -18,7 +18,7 @@ unconstrained fn mint_to_public_success() {
 
 #[test(should_fail_with = "Contract execution has reverted: Assertion failed: caller is not minter 'minter.eq(sender)'")]
 unconstrained fn mint_to_public_failure_as_non_minter() {
-    let (mut env, token_contract_address, owner, recipient, _) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, owner, recipient, _, admin) = utils::setup_with_minter(false);
 
     let mint_amount: u128 = 10_000;
     let mint_to_public_call_interface =
@@ -30,7 +30,7 @@ unconstrained fn mint_to_public_failure_as_non_minter() {
 
 #[test(should_fail_with = "Contract execution has reverted: Assertion failed: attempt to add with overflow 'self.storage.public_balances.at(to).read() + amount'")]
 unconstrained fn mint_to_public_failure_recipient_balance_overflow() {
-    let (mut env, token_contract_address, owner, recipient, minter) =
+    let (mut env, token_contract_address, owner, recipient, minter, admin) =
         utils::setup_with_minter(false);
 
     // We have to do this in 2 steps because we have to pass in a valid u128
@@ -47,7 +47,7 @@ unconstrained fn mint_to_public_failure_recipient_balance_overflow() {
 #[test(should_fail_with = "Contract execution has reverted: Assertion failed: attempt to add with overflow 'self.storage.public_balances.at(to).read() + amount'")]
 unconstrained fn mint_to_public_failure_overflow_total_supply() {
     // Setup without account contracts. We are not using authwits here, so dummy accounts are enough
-    let (mut env, token_contract_address, owner, _, minter) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, owner, _, minter, admin) = utils::setup_with_minter(false);
 
     let max_u128 = utils::max_u128();
     let mint_to_public_call_interface =

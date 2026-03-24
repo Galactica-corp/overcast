@@ -5,7 +5,7 @@ use generic_proxy::GenericProxy;
 
 #[test]
 unconstrained fn transfer_private_to_commitment() {
-    let (mut env, token_contract_address, owner, recipient) =
+    let (mut env, token_contract_address, owner, recipient, _) =
         utils::setup_and_mint_to_private_without_minter(false);
 
     utils::check_private_balance(env, token_contract_address, owner, mint_amount);
@@ -78,7 +78,7 @@ unconstrained fn transfer_private_to_commitment_on_behalf_of_other() {
 
 #[test(should_fail_with = "Nullifier witness not found for nullifier")]
 unconstrained fn transfer_private_to_commitment_wrong_completer() {
-    let (env, token_contract_address, owner, recipient) =
+    let (env, token_contract_address, owner, recipient, _) =
         utils::setup_and_mint_to_private_without_minter(false);
 
     utils::check_private_balance(env, token_contract_address, owner, mint_amount);

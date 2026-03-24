@@ -5,7 +5,7 @@ use uint_note::PartialUintNote;
 
 #[test]
 unconstrained fn initialize_transfer_commitment() {
-    let (env, token_contract_address, owner, recipient) =
+    let (env, token_contract_address, owner, recipient, _) =
         utils::setup_and_mint_to_private_without_minter(false);
 
     // Transfer tokens
@@ -26,7 +26,7 @@ unconstrained fn initialize_transfer_commitment() {
 
 #[test(should_fail_with = "Invalid partial note or completer")]
 unconstrained fn initialize_transfer_commitment_and_complete_with_incorrect_completer() {
-    let (env, token_contract_address, owner, recipient, minter) =
+    let (env, token_contract_address, owner, recipient, minter, _) =
         utils::setup_and_mint_to_private_with_minter(false);
 
     // Generate an address using a random field

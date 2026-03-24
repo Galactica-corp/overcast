@@ -7,7 +7,7 @@ use uint_note::UintNote;
 #[test]
 unconstrained fn transfer_private_to_public_on_behalf_of_self() {
     // Setup without account contracts. We are not using authwits here, so dummy accounts are enough
-    let (mut env, token_contract_address, owner, _) =
+    let (mut env, token_contract_address, owner, _, _) =
         utils::setup_and_mint_to_private_without_minter(false);
 
     let transfer_private_to_public_amount = mint_amount / (10 as u128);
@@ -74,7 +74,7 @@ unconstrained fn transfer_private_to_public_on_behalf_of_other() {
 #[test]
 unconstrained fn transfer_private_to_public_multiple_notes_recursively() {
     // Setup with account contracts. Slower since we actually deploy them, but needed for authwits.
-    let (mut env, token_contract_address, owner, recipient, minter) =
+    let (mut env, token_contract_address, owner, recipient, minter, _) =
         utils::setup_with_minter(true);
 
     let notes_amount = 1000 as u128;
@@ -121,7 +121,7 @@ unconstrained fn transfer_private_to_public_multiple_notes_recursively() {
 #[test(should_fail_with = "Balance too low")]
 unconstrained fn transfer_private_to_public_failure_more_than_balance() {
     // Setup without account contracts. We are not using authwits here, so dummy accounts are enough
-    let (mut env, token_contract_address, owner, _) =
+    let (mut env, token_contract_address, owner, _, _) =
         utils::setup_and_mint_to_private_without_minter(false);
 
     let transfer_private_to_public_amount = mint_amount + (1 as u128);

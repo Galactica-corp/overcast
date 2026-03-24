@@ -4,7 +4,7 @@ use aztec::oracle::random::random;
 #[test]
 unconstrained fn mint_to_commitment_success() {
     // Setup without account contracts. We are not using authwits here, so dummy accounts are enough
-    let (mut env, token_contract_address, _, recipient, minter) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, _, recipient, minter, admin) = utils::setup_with_minter(false);
 
     let commitment = env.call_private(
         minter,
@@ -25,7 +25,7 @@ unconstrained fn mint_to_commitment_success() {
 
 #[test(should_fail_with = "caller is not minter")]
 unconstrained fn mint_to_private_failure_unauthorized() {
-    let (mut env, token_contract_address, _, recipient, _) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, _, recipient, _, admin) = utils::setup_with_minter(false);
 
     let commitment = env.call_private(
         recipient,
@@ -41,7 +41,7 @@ unconstrained fn mint_to_private_failure_unauthorized() {
 
 #[test(should_fail_with = "attempt to add with overflow 'self.storage.total_supply.read() + amount'")]
 unconstrained fn mint_to_private_failure_balance_overflow() {
-    let (mut env, token_contract_address, owner, recipient, minter) =
+    let (mut env, token_contract_address, owner, recipient, minter, admin) =
         utils::setup_with_minter(false);
 
     let commitment = env.call_private(
@@ -67,7 +67,7 @@ unconstrained fn mint_to_private_failure_balance_overflow() {
 
 #[test(should_fail_with = "attempt to add with overflow 'self.storage.total_supply.read() + amount'")]
 unconstrained fn mint_to_private_failure_total_supply_overflow() {
-    let (mut env, token_contract_address, owner, recipient, minter) =
+    let (mut env, token_contract_address, owner, recipient, minter, admin) =
         utils::setup_with_minter(false);
 
     let commitment = env.call_private(
@@ -97,7 +97,7 @@ unconstrained fn mint_to_private_failure_total_supply_overflow() {
 
 #[test(should_fail_with = "Invalid partial note or completer 'context.nullifier_exists_unsafe(validity_commitment, context.this_address())'")]
 unconstrained fn mint_to_private_failure_invalid_commitments_random() {
-    let (mut env, token_contract_address, _, _, minter) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, _, _, minter, admin) = utils::setup_with_minter(false);
 
     let mint_amount: u128 = 10_000;
 
@@ -109,7 +109,7 @@ unconstrained fn mint_to_private_failure_invalid_commitments_random() {
 
 #[test(should_fail_with = "Invalid partial note or completer 'context.nullifier_exists_unsafe(validity_commitment, context.this_address())'")]
 unconstrained fn mint_to_private_failure_invalid_commitments_zero() {
-    let (mut env, token_contract_address, _, _, minter) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, _, _, minter, admin) = utils::setup_with_minter(false);
 
     let mint_amount: u128 = 10_000;
     env.call_public(minter, PrivateStablecoin::at(token_contract_address).mint_to_commitment(0, mint_amount));
@@ -117,7 +117,7 @@ unconstrained fn mint_to_private_failure_invalid_commitments_zero() {
 
 #[test(should_fail_with = "Got 2 logs for tag")]
 unconstrained fn mint_to_private_failure_already_completed_commitment() {
-    let (mut env, token_contract_address, _, recipient, minter) = utils::setup_with_minter(false);
+    let (mut env, token_contract_address, _, recipient, minter, admin) = utils::setup_with_minter(false);
 
     let commitment = env.call_private(
         minter,

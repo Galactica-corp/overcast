@@ -15,74 +15,47 @@ pub global mint_amount: u128 = 10_000 as u128;
 pub unconstrained fn setup_with_initial_supply(
     with_account_contracts: bool,
     initial_supply: u128,
-) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress) {
-    // Setup env, generate keys
-    let mut env = TestEnvironment::new();
+) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress, AztecAddress) {
+    let (env, token_contract_address, owner, recipient, minter, admin) =
+        setup_with_minter(with_account_contracts);
 
-    let (owner, recipient) = if with_account_contracts {
-        let owner = env.create_contract_account();
-        let recipient = env.create_contract_account();
-        (owner, recipient)
-    } else {
-        let owner = env.create_light_account();
-        let recipient = env.create_light_account();
-        (owner, recipient)
-    };
+    env.call_public(
+        minter,
+        PrivateStablecoin::at(token_contract_address).mint_to_public(owner, initial_supply),
+    );
 
-    let token_contract_address =
-        deploy_token_with_initial_supply(&mut env, owner, initial_supply, owner);
-
-    (env, token_contract_address, owner, recipient)
+    (env, token_contract_address, owner, recipient, admin)
 }
 
 pub unconstrained fn setup_with_minter(
     with_account_contracts: bool,
-) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress, AztecAddress) {
+) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress, AztecAddress, AztecAddress) {
     // Setup env, generate keys
     let mut env = TestEnvironment::new();
-    let (owner, recipient, minter) = if with_account_contracts {
+    let (owner, recipient, minter, admin) = if with_account_contracts {
         let owner = env.create_contract_account();
         let recipient = env.create_contract_account();
         let minter = env.create_contract_account();
-        (owner, recipient, minter)
+        let admin = env.create_contract_account();
+        (owner, recipient, minter, admin)
     } else {
         let owner = env.create_light_account();
         let recipient = env.create_light_account();
         let minter = env.create_light_account();
-        (owner, recipient, minter)
+        let admin = env.create_light_account();
+        (owner, recipient, minter, admin)
     };
 
-    let token_contract_address = deploy_token_with_minter(&mut env, owner, minter);
+    let token_contract_address = deploy_token_with_minter(&mut env, owner, minter, admin);
 
-    (env, token_contract_address, owner, recipient, minter)
-}
-
-pub unconstrained fn deploy_token_with_initial_supply(
-    env: &mut TestEnvironment,
-    owner: AztecAddress,
-    initial_supply: u128,
-    to: AztecAddress,
-) -> AztecAddress {
-    // Deploy token contract
-    let initializer_call_interface = PrivateStablecoin::interface().constructor_with_initial_supply(
-        "TestToken0000000000000000000000",
-        "TT00000000000000000000000000000",
-        18,
-        initial_supply,
-        to,
-    );
-    let token_contract_address = env.deploy("@private_stablecoin/PrivateStablecoin").with_public_initializer(
-        owner,
-        initializer_call_interface,
-    );
-
-    token_contract_address
+    (env, token_contract_address, owner, recipient, minter, admin)
 }
 
 pub unconstrained fn deploy_token_with_minter(
     env: &mut TestEnvironment,
     owner: AztecAddress,
     minter: AztecAddress,
+    admin: AztecAddress,
 ) -> AztecAddress {
     // Deploy token contract
     let initializer_call_interface = PrivateStablecoin::interface().constructor_with_minter(
@@ -90,6 +63,7 @@ pub unconstrained fn deploy_token_with_minter(
         "TT00000000000000000000000000000",
         18,
         minter,
+        admin,
     );
     let token_contract_address = env.deploy("@private_stablecoin/PrivateStablecoin").with_public_initializer(
         owner,
@@ -103,7 +77,7 @@ pub unconstrained fn setup_and_mint_to_public_without_minter(
     with_account_contracts: bool,
 ) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress) {
     // Setup
-    let (env, token_contract_address, owner, recipient) =
+    let (env, token_contract_address, owner, recipient, _admin) =
         setup_with_initial_supply(with_account_contracts, mint_amount);
 
     (env, token_contract_address, owner, recipient)
@@ -111,21 +85,25 @@ pub unconstrained fn setup_and_mint_to_public_without_minter(
 
 pub unconstrained fn setup_and_mint_to_private_with_minter(
     with_account_contracts: bool,
-) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress, AztecAddress) {
-    let (env, token_contract_address, owner, recipient, minter) =
+) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress, AztecAddress, AztecAddress) {
+    let (mut env, token_contract_address, owner, recipient, minter, admin) =
         setup_with_minter(with_account_contracts);
 
-    // Mint some tokens
-    mint_to_private(env, token_contract_address, owner, mint_amount, minter);
+    let note_randomness = random();
+    let _ = OracleMock::mock("getRandomField").returns(note_randomness);
+    env.call_private(
+        minter,
+        PrivateStablecoin::at(token_contract_address).mint_to_private(owner, mint_amount),
+    );
 
-    (env, token_contract_address, owner, recipient, minter)
+    (env, token_contract_address, owner, recipient, minter, admin)
 }
 
 pub unconstrained fn setup_and_mint_to_private_without_minter(
     with_account_contracts: bool,
-) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress) {
+) -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress, AztecAddress) {
     // Setup
-    let (env, token_contract_address, owner, recipient) =
+    let (env, token_contract_address, owner, recipient, admin) =
         setup_with_initial_supply(with_account_contracts, mint_amount);
 
     env.call_private(
@@ -133,7 +111,7 @@ pub unconstrained fn setup_and_mint_to_private_without_minter(
         PrivateStablecoin::at(token_contract_address).transfer_public_to_private(owner, owner, mint_amount, 0),
     );
 
-    (env, token_contract_address, owner, recipient)
+    (env, token_contract_address, owner, recipient, admin)
 }
 
 pub unconstrained fn mint_to_private(
@@ -230,7 +208,7 @@ pub unconstrained fn get_private_balance_notes(
 // caller, which is the condition that triggers authwit validation. We can't use another account for
 // this, since different scopes are enforced by TXE.
 pub unconstrained fn setup_and_mint_to_private_with_proxy() -> (TestEnvironment, AztecAddress, AztecAddress, AztecAddress, AztecAddress) {
-    let (mut env, token_contract_address, owner, recipient) =
+    let (mut env, token_contract_address, owner, recipient, _admin) =
         setup_and_mint_to_private_without_minter(/* with_account_contracts */ true);
     let proxy = env.deploy("@generic_proxy/GenericProxy").without_initializer();
     (env, token_contract_address, owner, recipient, proxy)

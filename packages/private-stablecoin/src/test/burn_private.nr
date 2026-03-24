@@ -5,7 +5,7 @@ use generic_proxy::GenericProxy;
 
 #[test]
 unconstrained fn burn_private_on_behalf_of_self() {
-    let (env, token_contract_address, owner, _) =
+    let (env, token_contract_address, owner, _, _) =
         utils::setup_and_mint_to_private_without_minter(false);
     let burn_amount = mint_amount / 10;
 

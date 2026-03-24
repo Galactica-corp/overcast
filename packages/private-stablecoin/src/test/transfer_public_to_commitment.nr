@@ -11,7 +11,7 @@ unconstrained fn transfer_public_to_commitment_internal_orchestration() {
     // The transfer to private is done in `utils::setup_and_mint_to_private_without_minter` and for this reason
     // in this test we just call it and check the outcome.
     // Setup without account contracts. We are not using authwits here, so dummy accounts are enough
-    let (mut env, token_contract_address, user, _) =
+    let (mut env, token_contract_address, user, _, _) =
         utils::setup_and_mint_to_private_without_minter(false);
 
     // User's private balance should be equal to the amount
