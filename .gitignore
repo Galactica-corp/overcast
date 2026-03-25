@@ -24,3 +24,6 @@ node_modules
 
 .vscode
 
+# Aztec / Nargo (and related) build output at workspace root
+target/
+
