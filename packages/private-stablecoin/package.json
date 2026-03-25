@@ -9,7 +9,7 @@
     "clean": "rm -rf ./src/artifacts ./target ./codegenCache.json",
     "clear-store": "rm -rf ./store",
     "codegen": "aztec codegen target --outdir src/artifacts",
-    "compile:deps": "(cd ../generic_proxy && aztec compile) && mkdir -p target && cp ../generic_proxy/target/generic_proxy-GenericProxy.json target/",
+    "compile:deps": "(cd crates/generic_proxy && aztec compile) && mkdir -p target && cp crates/generic_proxy/target/generic_proxy-GenericProxy.json target/",
     "compile": "aztec compile && yarn compile:deps",
     "deploy": "NODE_NO_WARNINGS=1 yarn exec tsx scripts/deploy_contract.ts",
     "deploy::devnet": "NODE_NO_WARNINGS=1 AZTEC_ENV=devnet yarn exec tsx scripts/deploy_contract.ts",

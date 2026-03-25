@@ -86,7 +86,6 @@ pub contract PrivateStablecoin {
         self.storage.name.initialize(FieldCompressedString::from_string(name));
         self.storage.symbol.initialize(FieldCompressedString::from_string(symbol));
         self.storage.decimals.initialize(decimals);
-        // Initialize PublicImmutables in the same order as the storage struct (minter, then admin).
         self.storage.minter.initialize(minter);
         self.storage.admin.initialize(admin);
     }

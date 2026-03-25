@@ -1,7 +1,7 @@
 [package]
 name = "private_stablecoin"
 type = "contract"
-authors = [""]
+authors = ["Galactica Network"]
 compiler_version = ">=1.0.0"
 
 [dependencies]
@@ -10,4 +10,3 @@ uint_note = { git = "https://github.com/AztecProtocol/aztec-packages/", tag = "v
 balance_set = { git = "https://github.com/AztecProtocol/aztec-packages/", tag = "v4.1.0-rc.4", directory = "noir-projects/aztec-nr/balance-set" }
 compressed_string = { git = "https://github.com/AztecProtocol/aztec-packages/", tag = "v4.1.0-rc.4", directory = "noir-projects/aztec-nr/compressed-string" }
 generic_proxy = { path = "../generic_proxy" }
-

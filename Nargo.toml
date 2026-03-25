@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "packages/private-stablecoin/crates/token",
+  "packages/private-stablecoin/crates/generic_proxy",
+  "packages/private-stablecoin/crates/bridge",
+  "packages/private-stablecoin/crates/token_portal_content_hash_lib"
+]

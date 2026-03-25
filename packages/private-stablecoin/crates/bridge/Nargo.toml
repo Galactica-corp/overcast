@@ -1,0 +1,10 @@
+[package]
+name = "bridge"
+type = "contract"
+authors = ["Galactica Network"]
+compiler_version = ">=1.0.0"
+
+[dependencies]
+aztec = { git="https://github.com/AztecProtocol/aztec-nr", tag="v4.1.0-rc.4", directory="aztec" }
+token = { path = "../token" }
+token_portal_content_hash_lib = { path = "../token_portal_content_hash_lib" }
