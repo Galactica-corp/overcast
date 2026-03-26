@@ -117,7 +117,7 @@ describe("StablecoinWrapper", async function () {
   });
 
   it("withdrawFromL2ToL1 pays the recipient after the portal consumes the message", async function () {
-    const { stablecoin, wrapper } = await deployFixture();
+    const { stablecoin, wrapper, portal } = await deployFixture();
     const amount = 50n;
     await stablecoin.write.mint([wrapper.address, amount]);
 
