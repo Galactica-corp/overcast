@@ -14,11 +14,12 @@ Protocol detail: [`docs/overcast_protocol_architecture.md`](docs/overcast_protoc
 
 ### Monorepo packages
 
-| Package                                      | Path                                                         | Role                                                |
-| -------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------- |
-| `@galactica-net/overcast-stablecoin-wrapper` | [`packages/stablecoin-wrapper`](packages/stablecoin-wrapper) | Solidity L1 wrapping / portal-style contracts       |
-| `@galactica-net/overcast-token-bridge`       | [`packages/token-bridge`](packages/token-bridge)             | Ethereum → Aztec private bridge infrastructure      |
-| `@galactica-net/overcast-private-stablecoin` | [`packages/private-stablecoin`](packages/private-stablecoin) | Noir token on Aztec (private + compliant transfers) |
+| Package                                      | Path                                                         | Role                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `@galactica-net/overcast-stablecoin-wrapper` | [`packages/stablecoin-wrapper`](packages/stablecoin-wrapper) | Solidity L1 wrapping / portal-style contracts                        |
+| `@galactica-net/overcast-private-stablecoin` | [`packages/private-stablecoin`](packages/private-stablecoin) | **All Aztec Noir** — private token, token bridge, shared Noir crates |
+
+[`packages/private-stablecoin`](packages/private-stablecoin) holds every Noir crate (token, bridge, libraries such as portal content hash and helpers under `crates/`). The former top-level `packages/token-bridge` workspace is gone; use that package’s [`README.md`](packages/private-stablecoin/README.md) and [`AGENTS.md`](packages/private-stablecoin/AGENTS.md) for compile, test, and layout.
 
 ---
 

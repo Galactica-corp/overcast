@@ -897,6 +897,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@aztec/l1-contracts@npm:0.76.4":
+  version: 0.76.4
+  resolution: "@aztec/l1-contracts@npm:0.76.4"
+  checksum: 10c0/7f7a327dd2602816d641aeaba02a48e22f7a24dd2dc0a62e184f0cf2493e04c72acebcafe36b63b2e5d279b709c0662bd458b94cdb9b0dae7102cada45eb8c9a
+  languageName: node
+  linkType: hard
+
 "@aztec/merkle-tree@npm:4.1.0-rc.4":
   version: 4.1.0-rc.4
   resolution: "@aztec/merkle-tree@npm:4.1.0-rc.4"
@@ -2157,6 +2164,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@galactica-net/overcast-stablecoin-wrapper@workspace:packages/stablecoin-wrapper"
   dependencies:
+    "@aztec/l1-contracts": "npm:0.76.4"
+    "@nomicfoundation/hardhat-foundry": "npm:^3.0.0"
     "@nomicfoundation/hardhat-ignition": "npm:^3.1.0"
     "@nomicfoundation/hardhat-ignition-viem": "npm:^3.1.0"
     "@nomicfoundation/hardhat-keystore": "npm:^3.0.5"
@@ -2173,12 +2182,6 @@ __metadata:
     hardhat: "npm:^3.2.0"
     typescript: "npm:^5.9.3"
     viem: "npm:^2.43.0"
-  languageName: unknown
-  linkType: soft
-
-"@galactica-net/overcast-token-bridge@workspace:packages/token-bridge":
-  version: 0.0.0-use.local
-  resolution: "@galactica-net/overcast-token-bridge@workspace:packages/token-bridge"
   languageName: unknown
   linkType: soft
 
@@ -2909,6 +2912,18 @@ __metadata:
   dependencies:
     "@nomicfoundation/hardhat-utils": "npm:^4.0.1"
   checksum: 10c0/07da3a9e9b0fadfe4571f3f7bdbdb64f1d7ed358551389aed9c20ac26d31372fb6d4c7c8f15f8cf0ca2579cd580b4069ec54863b3b28ceaa735814ca2569144f
+  languageName: node
+  linkType: hard
+
+"@nomicfoundation/hardhat-foundry@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@nomicfoundation/hardhat-foundry@npm:3.0.0"
+  dependencies:
+    "@nomicfoundation/hardhat-errors": "npm:^3.0.7"
+    "@nomicfoundation/hardhat-utils": "npm:^4.0.0"
+  peerDependencies:
+    hardhat: ^3.1.10
+  checksum: 10c0/a813ca70291c7afcc61490d54b57f55d0afd59cd864c64e79fd42b74ce222d15599255feedfd67fecd52104054d3b6e43a761e4d7c29b21034140dd7c05b2433
   languageName: node
   linkType: hard
 
