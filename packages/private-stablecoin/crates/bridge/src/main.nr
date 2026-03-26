@@ -10,10 +10,7 @@ use aztec::macros::aztec;
 pub contract TokenBridge {
     use aztec::{protocol::address::{AztecAddress, EthAddress}, state_vars::PublicImmutable};
 
-    use token_portal_content_hash_lib::{
-        get_mint_to_private_content_hash, get_mint_to_public_content_hash,
-        get_withdraw_content_hash,
-    };
+    use token_portal_content_hash_lib::{get_mint_to_private_content_hash, get_withdraw_content_hash};
 
     use token::PrivateStablecoin;
 
@@ -46,10 +43,10 @@ pub contract TokenBridge {
         self.storage.portal.read()
     }
     
-    // Consumes a L1->L2 message and calls the token contract to mint the appropriate amount publicly
+    // Consumes the same L1->L2 message as `claim_private` (single L1 deposit hash) and mints publicly.
     #[external("public")]
     fn claim_public(to: AztecAddress, amount: u128, secret: Field, message_leaf_index: Field) {
-        let content_hash = get_mint_to_public_content_hash(to, amount);
+        let content_hash = get_mint_to_private_content_hash(amount);
 
         // Consume message and emit nullifier
         self.context.consume_l1_to_l2_message(

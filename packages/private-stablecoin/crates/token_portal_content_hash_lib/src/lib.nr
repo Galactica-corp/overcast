@@ -1,7 +1,8 @@
 use aztec::protocol::{address::{AztecAddress, EthAddress}, hash::sha256_to_field, traits::ToField};
 
-// Computes a content hash of a deposit/mint_to_public message.
-// Refer TokenPortal.sol for reference on L1.
+// Computes a content hash of a deposit/mint_to_public message (not used by the current L1 `depositToAztec`,
+// which only sends `mint_to_private`; kept for compatibility / future use).
+// Refer TokenPortal.sol / `TokenPortalContentHash.sol` for reference on L1.
 pub fn get_mint_to_public_content_hash(owner: AztecAddress, amount: u128) -> Field {
     let mut hash_bytes = [0; 68];
     let recipient_bytes: [u8; 32] = owner.to_field().to_be_bytes();
@@ -25,8 +26,8 @@ pub fn get_mint_to_public_content_hash(owner: AztecAddress, amount: u128) -> Fie
     content_hash
 }
 
-// Computes a content hash of a deposit/mint_to_private message.
-// Refer TokenPortal.sol for reference on L1.
+// Computes a content hash of a deposit/mint_to_private message (this matches the single L1 `depositToAztec`).
+// Refer TokenPortal.sol / `TokenPortalContentHash.sol` for reference on L1.
 pub fn get_mint_to_private_content_hash(amount: u128) -> Field {
     let mut hash_bytes = [0; 36];
     let amount_bytes: [u8; 32] = (amount as Field).to_be_bytes();
