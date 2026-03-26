@@ -39,7 +39,6 @@ const runAztecE2E = process.env.RUN_AZTEC_E2E === '1';
       'OS',
       18,
       adminAccount.address,
-      adminAccount.address,
     );
     const deployed = await deployRequest.send({
       from: adminAccount.address,

@@ -55,7 +55,7 @@ pub contract PrivateStablecoin {
     /// @param private_balances The private balances of the token
     /// @param total_supply The total supply of the token
     /// @param public_balances The public balances of the token
-    /// @param minter The account permissioned to mint the token
+    /// @param minter The account permissioned to mint (mutable; use `set_minter` after deploying the bridge)
     #[storage]
     struct Storage<Context> {
         name: PublicImmutable<FieldCompressedString, Context>,
@@ -64,30 +64,39 @@ pub contract PrivateStablecoin {
         private_balances: Owned<BalanceSet<Context>, Context>,
         total_supply: PublicMutable<u128, Context>,
         public_balances: Map<AztecAddress, PublicMutable<u128, Context>, Context>,
-        minter: PublicImmutable<AztecAddress, Context>,
+        minter: PublicMutable<AztecAddress, Context>,
         admin: PublicImmutable<AztecAddress, Context>,
     }
 
-    /// @notice Initializes the token with a minter
+    /// @notice Initializes the token; minter starts as `admin` until `set_minter` wires the bridge.
     /// @param name The name of the token
     /// @param symbol The symbol of the token
     /// @param decimals The number of decimals of the token
-    /// @param minter The address of the minter
-    /// @param admin The address of the admin
+    /// @param admin The address of the admin (initial minter)
     #[external("public")]
     #[initializer]
     fn constructor_with_minter(
-    name: str<31>,
-        symbol: str<31>, 
-        decimals: u8, 
-        minter: AztecAddress,
+        name: str<31>,
+        symbol: str<31>,
+        decimals: u8,
         admin: AztecAddress,
-     ) {
+    ) {
         self.storage.name.initialize(FieldCompressedString::from_string(name));
         self.storage.symbol.initialize(FieldCompressedString::from_string(symbol));
         self.storage.decimals.initialize(decimals);
-        self.storage.minter.initialize(minter);
         self.storage.admin.initialize(admin);
+        self.storage.minter.write(admin);
+    }
+
+    /// @notice One-time: set minter to the bridge (or test minter). Only admin; only while minter is still admin.
+    #[external("public")]
+    fn set_minter(new_minter: AztecAddress) {
+        assert(self.storage.admin.read().eq(self.msg_sender()), "caller is not admin");
+        assert(
+            self.storage.minter.read().eq(self.storage.admin.read()),
+            "minter already set to bridge",
+        );
+        self.storage.minter.write(new_minter);
     }
 
     /** ==========================================================
@@ -372,7 +381,8 @@ pub contract PrivateStablecoin {
     /// @param amount The amount of tokens to mint
     #[external("private")]
     fn mint_to_private(to: AztecAddress, amount: u128) {
-        _validate_minter(self.msg_sender(), self.storage.minter.read());
+        // `PublicMutable` cannot be read in private; assert minter in an enqueued public call.
+        self.enqueue_self._assert_minter(self.msg_sender());
 
         self.internal._mint_to_private(to, amount);
     }
@@ -404,6 +414,13 @@ pub contract PrivateStablecoin {
         );
 
         self.emit(Transfer { from: AztecAddress::zero(), to: PRIVATE_ADDRESS_MAGIC_VALUE, amount });
+    }
+
+    /// @notice Enqueued from `mint_to_private` so `minter` (`PublicMutable`) is read in public execution.
+    #[external("public")]
+    #[only_self]
+    fn _assert_minter(account: AztecAddress) {
+        _validate_minter(account, self.storage.minter.read());
     }
 
     /// @notice Internal function to increase the total supply by `amount`

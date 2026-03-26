@@ -3,7 +3,6 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { createAztecNodeClient } from '@aztec/aztec.js/node';
 import { AztecAddress, EthAddress } from '@aztec/aztec.js/addresses';
-import { getContractInstanceFromInstantiationParams } from '@aztec/aztec.js/contracts';
 import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
 import { Fr } from '@aztec/aztec.js/fields';
 import { createExtendedL1Client } from '@aztec/ethereum/client';
@@ -13,8 +12,8 @@ import type { Abi } from 'viem';
 import { foundry, sepolia } from 'viem/chains';
 import { padHex } from 'viem';
 
-import { PrivateStablecoinContract, PrivateStablecoinContractArtifact } from '../artifacts/PrivateStablecoin.js';
-import { TokenBridgeContract, TokenBridgeContractArtifact } from '../artifacts/TokenBridge.js';
+import { PrivateStablecoinContract } from '../artifacts/PrivateStablecoin.js';
+import { TokenBridgeContract } from '../artifacts/TokenBridge.js';
 import { getAztecNodeUrl, getL1ChainId, getL1RpcUrl, getTimeouts } from '../../config/config.js';
 import { deploySchnorrAccount } from './deploy_account.js';
 import { getSponsoredFPCInstance } from './sponsored_fpc.js';
@@ -66,40 +65,8 @@ const DEFAULT_MNEMONIC =
   'test test test test test test test test test test test junk';
 
 /**
- * Resolve (L2 token, L2 bridge) contract instance addresses where token minter is bridge and bridge references token + L1 portal.
- * Fixed-point iteration is required because both addresses depend on each other.
- */
-export async function resolveTokenAndBridgeInstanceAddresses(
-  saltToken: Fr,
-  saltBridge: Fr,
-  portalEth: EthAddress,
-  name: string,
-  symbol: string,
-  decimals: bigint,
-  admin: AztecAddress,
-): Promise<{ tokenAddr: AztecAddress; bridgeAddr: AztecAddress }> {
-  let bridgeAddr = AztecAddress.ZERO;
-  for (let i = 0; i < 64; i++) {
-    const tokenInst = await getContractInstanceFromInstantiationParams(PrivateStablecoinContractArtifact, {
-      salt: saltToken,
-      constructorArgs: [name, symbol, decimals, bridgeAddr, admin],
-    });
-    const tokenAddr = tokenInst.address;
-    const bridgeInst = await getContractInstanceFromInstantiationParams(TokenBridgeContractArtifact, {
-      salt: saltBridge,
-      constructorArgs: [tokenAddr, portalEth],
-    });
-    const candidateBridge = bridgeInst.address;
-    if (candidateBridge.equals(bridgeAddr)) {
-      return { tokenAddr, bridgeAddr: candidateBridge };
-    }
-    bridgeAddr = candidateBridge;
-  }
-  throw new Error('Token/bridge address fixed point did not converge within 64 iterations');
-}
-
-/**
- * Full stack: L1 underlying + portal + wrapper init → L2 token + bridge (deterministic salts) → L1 portal init.
+ * Full stack: L1 underlying + portal + wrapper init → L2 token + bridge (deterministic salts) →
+ * public `set_minter(bridge)` on token → L1 portal init.
  */
 export async function deployTokenBridgeStack(
   opts: DeployTokenBridgeOptions,
@@ -171,22 +138,11 @@ export async function deployTokenBridgeStack(
   const deployer = await deploySchnorrAccount(wallet);
   const admin = deployer.address;
 
-  const { tokenAddr, bridgeAddr } = await resolveTokenAndBridgeInstanceAddresses(
-    saltToken,
-    saltBridge,
-    portalEth,
-    tokenName,
-    tokenSymbol,
-    tokenDecimals,
-    admin,
-  );
-
   const tokenDeploy = PrivateStablecoinContract.deployWithOpts(
     { wallet, method: 'constructor_with_minter' },
     tokenName,
     tokenSymbol,
     tokenDecimals,
-    bridgeAddr,
     admin,
   );
   await tokenDeploy.simulate({ from: admin });
@@ -197,13 +153,8 @@ export async function deployTokenBridgeStack(
     contractAddressSalt: saltToken,
     universalDeploy: true,
   });
-  const l2Token = tokenReceipt.contract.address;
-
-  if (!l2Token.equals(tokenAddr)) {
-    throw new Error(
-      `Deployed token address ${l2Token.toString()} does not match preimage ${tokenAddr.toString()}`,
-    );
-  }
+  const tokenContract = tokenReceipt.contract;
+  const l2Token = tokenContract.address;
 
   const bridgeDeploy = TokenBridgeContract.deploy(wallet, l2Token, portalEth);
   await bridgeDeploy.simulate({ from: admin });
@@ -216,11 +167,12 @@ export async function deployTokenBridgeStack(
   });
   const l2Bridge = bridgeReceipt.contract.address;
 
-  if (!l2Bridge.equals(bridgeAddr)) {
-    throw new Error(
-      `Deployed bridge address ${l2Bridge.toString()} does not match preimage ${bridgeAddr.toString()}`,
-    );
-  }
+  await tokenContract.methods.set_minter(l2Bridge).simulate({ from: admin });
+  await tokenContract.methods.set_minter(l2Bridge).send({
+    from: admin,
+    fee: { paymentMethod: sponsoredPaymentMethod },
+    wait: { timeout: timeouts.deployTimeout },
+  });
 
   const l2BridgeBytes32 = padHex(`0x${Buffer.from(l2Bridge.toBuffer()).toString('hex')}`, {
     size: 32,

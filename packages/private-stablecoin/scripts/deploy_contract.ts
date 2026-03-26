@@ -30,7 +30,6 @@ async function main() {
     'OS',
     18,
     address,
-    address,
   );
   await deployRequest.simulate({ from: address });
   const { receipt } = await deployRequest.send({

@@ -62,12 +62,16 @@ pub unconstrained fn deploy_token_with_minter(
         "TestToken0000000000000000000000",
         "TT00000000000000000000000000000",
         18,
-        minter,
         admin,
     );
     let token_contract_address = env.deploy("@private_stablecoin/PrivateStablecoin").with_public_initializer(
         owner,
         initializer_call_interface,
+    );
+
+    env.call_public(
+        admin,
+        PrivateStablecoin::at(token_contract_address).set_minter(minter),
     );
 
     token_contract_address
