@@ -7,18 +7,14 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 
 import {TokenPortal} from "./TokenPortal.sol";
 
-/// @notice Holds underlying ERC20 for shielded balances and Aztec bridge collateral. `bridgeToAztec` pulls
-///         underlying here then calls `TokenPortal` (which does not custody tokens).
+/// @notice Holds underlying ERC20 as Aztec bridge collateral. `bridgeToAztec` pulls underlying here then calls
+///         `TokenPortal` (which does not custody tokens).
 contract StablecoinWrapper is Initializable {
   using SafeERC20 for IERC20;
 
   IERC20 public underlyingToken;
   TokenPortal public tokenPortal;
 
-  mapping(address => uint256) public balances;
-
-  event Shielded(address indexed depositor, address indexed recipient, uint256 amount);
-  event Unshielded(address indexed account, uint256 amount);
   event BridgedToAztec(address indexed from, uint256 amount, bytes32 secretHash);
   event WithdrawnFromL2(address indexed recipient, uint256 amount, address indexed callerOnL1);
 
@@ -28,27 +24,6 @@ contract StablecoinWrapper is Initializable {
 
     underlyingToken = IERC20(underlyingToken_);
     tokenPortal = TokenPortal(tokenPortal_);
-  }
-
-  function shield(address recipient, uint256 amount) public {
-    require(recipient != address(0), "shield: recipient is zero");
-    require(amount > 0, "shield: amount must be positive");
-
-    underlyingToken.safeTransferFrom(msg.sender, address(this), amount);
-    balances[recipient] += amount;
-
-    emit Shielded(msg.sender, recipient, amount);
-  }
-
-  function unshield(uint256 amount) public {
-    uint256 balance = balances[msg.sender];
-    require(balance >= amount, "unshield: insufficient balance");
-    require(amount > 0, "unshield: amount must be positive");
-
-    balances[msg.sender] = balance - amount;
-    underlyingToken.safeTransfer(msg.sender, amount);
-
-    emit Unshielded(msg.sender, amount);
   }
 
   /// @notice Pull underlying from the caller into this contract and enqueue an L1→L2 bridge message.

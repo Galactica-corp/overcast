@@ -2,19 +2,20 @@
 
 ## Project
 
-**Overcast** is a privacy-oriented stablecoin and settlement stack: public **Ethereum** contracts for wrapping and messaging, **Aztec / Noir** for private token logic and transfers, and **Galactica ZK KYC** for identity and compliance inside the private layer. High-level behavior and architecture live under `docs/` (see `overcast_protocol_architecture.md` and `private_stablecoin_working_doc.md`).
+**Overcast** is a privacy-oriented stablecoin and settlement stack: public **Ethereum** contracts for wrapping and messaging, **Aztec / Noir** for private token logic, the **token bridge**, and shared Noir utilities (all in [`packages/private-stablecoin/`](packages/private-stablecoin/)), and **Galactica ZK KYC** for identity and compliance inside the private layer. High-level behavior and architecture live under `docs/` (see `overcast_protocol_architecture.md` and `private_stablecoin_working_doc.md`).
 
 The repo is a **Yarn 4** monorepo (`packageManager` in root `package.json`). Run installs from the repository root.
 
+**Use Yarn for Node tooling in this repo**, not `npx`: run binaries with `yarn exec <command>` from a package directory, or `yarn workspace <workspace-name> run <script>` / `yarn workspace <workspace-name> exec <command>` from the repo root. One-off CLIs outside the workspace may use `yarn dlx <package>` (Yarn’s equivalent to `npx -y`).
+
 ## Repository layout
 
-| Path                           | Role                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `package.json`                 | Root workspace manifest: `@galactica-net/overcast`, workspaces `packages/*`.                                                                                                                                                                                                                                                                                |
-| `packages/stablecoin-wrapper/` | Solidity L1 stablecoin wrap / portal-style contracts (placeholder).                                                                                                                                                                                                                                                                                         |
-| `packages/token-bridge/`       | Bridge infrastructure from Ethereum toward private Aztec representation; conceptually aligned with Aztec [`token_bridge_contract`](https://github.com/AztecProtocol/aztec-packages/tree/next/noir-projects/noir-contracts/contracts/app/token_bridge_contract).                                                                                             |
-| `packages/private-stablecoin/` | Noir Aztec token for private + compliant transfers; baseline aligned with Aztec [`private_token_contract`](https://github.com/AztecProtocol/aztec-packages/tree/next/noir-projects/noir-contracts/contracts/app/private_token_contract). Package-local Aztec/TS workflow: [`packages/private-stablecoin/AGENTS.md`](packages/private-stablecoin/AGENTS.md). |
-| `docs/`                        | Protocol and product documentation (source of truth for requirements and architecture).                                                                                                                                                                                                                                                                     |
+| Path                           | Role |
+| ------------------------------ | ---- |
+| `package.json`                 | Root workspace manifest: `@galactica-net/overcast`, workspaces `packages/*`. |
+| `packages/stablecoin-wrapper/` | Solidity L1 stablecoin wrap / portal-style contracts (placeholder). |
+| `packages/private-stablecoin/` | **All repo Noir on Aztec:** private token, Ethereum → Aztec **token bridge**, and shared Noir crates (portal content hash, proxy helpers, etc.). Conceptually aligned with Aztec’s [`private_token_contract`](https://github.com/AztecProtocol/aztec-packages/tree/next/noir-projects/noir-contracts/contracts/app/private_token_contract) and [`token_bridge_contract`](https://github.com/AztecProtocol/aztec-packages/tree/next/noir-projects/noir-contracts/contracts/app/token_bridge_contract). Package workflow: [`packages/private-stablecoin/AGENTS.md`](packages/private-stablecoin/AGENTS.md). |
+| `docs/`                        | Protocol and product documentation (source of truth for requirements and architecture). |
 
 When adding new components, prefer new folders under `packages/` and register them via the root `workspaces` glob or an explicit entry in root `package.json`.
 
@@ -26,8 +27,8 @@ For up-to-date Aztec/Noir context (code search, docs, examples, version alignmen
 
 Typical Cursor-style configuration (see the doc above for your client):
 
-- **Aztec:** `npx -y @aztec/mcp-server@latest`
-- **Noir:** `npx -y noir-mcp-server@latest`
+- **Aztec:** `yarn dlx @aztec/mcp-server@latest`
+- **Noir:** `yarn dlx noir-mcp-server@latest`
 
 Project-level files like this `AGENTS.md` complement MCP: they apply even when a server is not invoked.
 

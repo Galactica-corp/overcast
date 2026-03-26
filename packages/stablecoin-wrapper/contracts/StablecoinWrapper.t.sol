@@ -12,7 +12,6 @@ contract StablecoinWrapperTest is Test {
   TokenPortal portal;
   TestERC20 stablecoin;
   address depositor = makeAddr("depositor");
-  address recipient = makeAddr("recipient");
 
   bytes32 internal constant L2_BRIDGE = bytes32(uint256(0xabcd));
 
@@ -39,36 +38,5 @@ contract StablecoinWrapperTest is Test {
   function test_InitializeStoresUnderlyingTokenAndPortal() public view {
     assertEq(address(wrapper.underlyingToken()), address(stablecoin));
     assertEq(address(wrapper.tokenPortal()), address(portal));
-  }
-
-  function test_ShieldCreditsRecipientAndTransfersUnderlying() public {
-    uint256 amount = 25 ether;
-
-    vm.prank(depositor);
-    wrapper.shield(recipient, amount);
-
-    assertEq(wrapper.balances(recipient), amount);
-    assertEq(stablecoin.balanceOf(address(wrapper)), amount);
-    assertEq(stablecoin.balanceOf(depositor), 75 ether);
-  }
-
-  function test_UnshieldReducesBalanceAndReturnsUnderlying() public {
-    uint256 shieldAmount = 40 ether;
-    uint256 withdrawAmount = 15 ether;
-
-    vm.startPrank(depositor);
-    wrapper.shield(depositor, shieldAmount);
-    wrapper.unshield(withdrawAmount);
-    vm.stopPrank();
-
-    assertEq(wrapper.balances(depositor), shieldAmount - withdrawAmount);
-    assertEq(stablecoin.balanceOf(address(wrapper)), shieldAmount - withdrawAmount);
-    assertEq(stablecoin.balanceOf(depositor), 75 ether);
-  }
-
-  function test_UnshieldInsufficientBalanceReverts() public {
-    vm.prank(recipient);
-    vm.expectRevert(bytes("unshield: insufficient balance"));
-    wrapper.unshield(1);
   }
 }
