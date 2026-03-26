@@ -24,13 +24,12 @@ async function main() {
   const address = account.address;
   logger.info(`Admin account: ${address}`);
 
-  const initialSupply = 1000n;
   const deployRequest = PrivateStablecoinContract.deployWithOpts(
-    { wallet, method: 'constructor_with_initial_supply' },
+    { wallet, method: 'constructor_with_minter' },
     'Overcast Stablecoin',
     'OS',
     18,
-    initialSupply,
+    address,
     address,
   );
   await deployRequest.simulate({ from: address });
@@ -40,6 +39,14 @@ async function main() {
     wait: { timeout: timeouts.deployTimeout, returnReceipt: true },
   });
   const token = receipt.contract;
+
+  const initialSupply = 1000n;
+  await token.methods.mint_to_public(address, initialSupply).simulate({ from: address });
+  await token.methods.mint_to_public(address, initialSupply).send({
+    from: address,
+    fee: { paymentMethod: sponsoredPaymentMethod },
+    wait: { timeout: timeouts.deployTimeout },
+  });
 
   logger.info(`PrivateStablecoin deployed at: ${token.address}`);
 }

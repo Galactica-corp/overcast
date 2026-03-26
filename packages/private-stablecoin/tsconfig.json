@@ -24,11 +24,13 @@
   },
   "include": [
     "src",
+    "src/test/**/*.ts",
     "scripts/**/*",
     "src/**/*.json",
     "src/artifacts/*",
     "target/**/*",
     "target/*.json",
     "config/config.ts"
-  ]
+  ],
+  "exclude": ["src/artifacts/Main.ts", "src/artifacts/GenericProxy.ts"]
 }

@@ -112,6 +112,10 @@ export function getL1RpcUrl(): string {
   return configManager.getL1RpcUrl();
 }
 
+export function getL1ChainId(): number {
+  return configManager.getNetworkConfig().l1ChainId;
+}
+
 export function getEnv(): string {
   return configManager.getConfig().name;
 }

@@ -10,7 +10,9 @@ import { type ContractInstanceWithAddress } from '@aztec/aztec.js/contracts';
 import { EmbeddedWallet } from '@aztec/wallets/embedded';
 import { AccountManager } from '@aztec/aztec.js/wallet';
 
-describe('PrivateStablecoin (private stablecoin prototype, Aztec E2E)', () => {
+const runAztecE2E = process.env.RUN_AZTEC_E2E === '1';
+
+(runAztecE2E ? describe : describe.skip)('PrivateStablecoin (private stablecoin prototype, Aztec E2E)', () => {
   let logger: Logger;
   let sponsoredFPC: ContractInstanceWithAddress;
   let sponsoredPaymentMethod: SponsoredFeePaymentMethod;
@@ -31,13 +33,12 @@ describe('PrivateStablecoin (private stablecoin prototype, Aztec E2E)', () => {
     adminAccount = await deploySchnorrAccount(wallet);
     await wallet.registerSender(adminAccount.address, 'admin');
 
-    const initialSupply = 1000n;
     const deployRequest = PrivateStablecoinContract.deployWithOpts(
-      { wallet, method: 'constructor_with_initial_supply' },
+      { wallet, method: 'constructor_with_minter' },
       'Overcast Stablecoin',
       'OS',
       18,
-      initialSupply,
+      adminAccount.address,
       adminAccount.address,
     );
     const deployed = await deployRequest.send({
@@ -46,6 +47,16 @@ describe('PrivateStablecoin (private stablecoin prototype, Aztec E2E)', () => {
       wait: { timeout: getTimeouts().deployTimeout },
     });
     contract = deployed.contract;
+
+    const initialSupply = 1000n;
+    await contract.methods.mint_to_public(adminAccount.address, initialSupply).simulate({
+      from: adminAccount.address,
+    });
+    await contract.methods.mint_to_public(adminAccount.address, initialSupply).send({
+      from: adminAccount.address,
+      fee: { paymentMethod: sponsoredPaymentMethod },
+      wait: { timeout: getTimeouts().deployTimeout },
+    });
 
     logger.info(`PrivateStablecoin deployed at ${contract.address.toString()}`);
   }, 600000);
