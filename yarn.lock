@@ -897,10 +897,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aztec/l1-contracts@npm:0.76.4":
-  version: 0.76.4
-  resolution: "@aztec/l1-contracts@npm:0.76.4"
-  checksum: 10c0/7f7a327dd2602816d641aeaba02a48e22f7a24dd2dc0a62e184f0cf2493e04c72acebcafe36b63b2e5d279b709c0662bd458b94cdb9b0dae7102cada45eb8c9a
+"@aztec/l1-contracts@git+https://github.com/AztecProtocol/l1-contracts.git#v4.0.0-devnet.2-patch.1":
+  version: 4.0.0-devnet.2-patch.1
+  resolution: "@aztec/l1-contracts@https://github.com/AztecProtocol/l1-contracts.git#commit=9208625138568aed0289f366a13c91b311595345"
+  checksum: 10c0/39e0348492e6afc700e5d468d7856ae6b9d38414e8afce51a4bf34697b771fea5b417dbbc232c46418d129638f4cb80373017bbd38a3e41612f188302a833493
   languageName: node
   linkType: hard
 
@@ -2166,7 +2166,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@galactica-net/overcast-stablecoin-wrapper@workspace:packages/stablecoin-wrapper"
   dependencies:
-    "@aztec/l1-contracts": "npm:0.76.4"
+    "@aztec/l1-contracts": "git+https://github.com/AztecProtocol/l1-contracts.git#v4.0.0-devnet.2-patch.1"
     "@nomicfoundation/hardhat-foundry": "npm:^3.0.0"
     "@nomicfoundation/hardhat-ignition": "npm:^3.1.0"
     "@nomicfoundation/hardhat-ignition-viem": "npm:^3.1.0"

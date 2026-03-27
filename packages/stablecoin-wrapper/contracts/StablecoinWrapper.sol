@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Epoch} from "@aztec/core/libraries/TimeLib.sol";
 
 import {TokenPortal} from "./TokenPortal.sol";
 
@@ -15,11 +16,25 @@ contract StablecoinWrapper is Initializable {
   IERC20 public underlyingToken;
   TokenPortal public tokenPortal;
 
-  event BridgedToAztec(address indexed from, uint256 amount, bytes32 secretHash);
-  event WithdrawnFromL2(address indexed recipient, uint256 amount, address indexed callerOnL1);
+  event BridgedToAztec(
+    address indexed from,
+    uint256 amount,
+    bytes32 secretHash
+  );
+  event WithdrawnFromL2(
+    address indexed recipient,
+    uint256 amount,
+    address indexed callerOnL1
+  );
 
-  function initialize(address underlyingToken_, address tokenPortal_) public initializer {
-    require(underlyingToken_ != address(0), "initialize: underlying token is zero");
+  function initialize(
+    address underlyingToken_,
+    address tokenPortal_
+  ) public initializer {
+    require(
+      underlyingToken_ != address(0),
+      "initialize: underlying token is zero"
+    );
     require(tokenPortal_ != address(0), "initialize: token portal is zero");
 
     underlyingToken = IERC20(underlyingToken_);
@@ -27,12 +42,18 @@ contract StablecoinWrapper is Initializable {
   }
 
   /// @notice Pull underlying from the caller into this contract and enqueue an L1→L2 bridge message.
-  function bridgeToAztec(uint256 amount, bytes32 secretHash) external returns (bytes32, uint256) {
+  function bridgeToAztec(
+    uint256 amount,
+    bytes32 secretHash
+  ) external returns (bytes32, uint256) {
     require(amount > 0, "bridge: amount must be positive");
     require(amount <= type(uint128).max, "bridge: amount exceeds uint128");
 
     underlyingToken.safeTransferFrom(msg.sender, address(this), amount);
-    (bytes32 key, uint256 index) = tokenPortal.depositToAztec(amount, secretHash);
+    (bytes32 key, uint256 index) = tokenPortal.depositToAztec(
+      amount,
+      secretHash
+    );
 
     emit BridgedToAztec(msg.sender, amount, secretHash);
     return (key, index);
@@ -44,16 +65,19 @@ contract StablecoinWrapper is Initializable {
     address recipient,
     uint256 amount,
     address callerOnL1,
-    uint256 l2BlockNumber,
+    Epoch epoch,
     uint256 leafIndex,
     bytes32[] calldata path
   ) external {
     require(amount > 0, "withdraw: amount must be positive");
     require(amount <= type(uint128).max, "withdraw: amount exceeds uint128");
     require(recipient != address(0), "withdraw: recipient is zero");
-    require(underlyingToken.balanceOf(address(this)) >= amount, "withdraw: insufficient collateral");
+    require(
+      underlyingToken.balanceOf(address(this)) >= amount,
+      "withdraw: insufficient collateral"
+    );
 
-    tokenPortal.withdraw(recipient, amount, callerOnL1, l2BlockNumber, leafIndex, path);
+    tokenPortal.withdraw(recipient, amount, callerOnL1, epoch, leafIndex, path);
     underlyingToken.safeTransfer(recipient, amount);
 
     emit WithdrawnFromL2(recipient, amount, callerOnL1);

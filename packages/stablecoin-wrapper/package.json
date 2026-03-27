@@ -6,10 +6,11 @@
   "description": "Solidity L1 contracts for wrapping public stablecoins (portal / escrow) ahead of private settlement on Aztec.",
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/ensure-l1-contracts-oz-remapping.mjs",
     "test": "hardhat test"
   },
   "devDependencies": {
-    "@aztec/l1-contracts": "0.76.4",
+    "@aztec/l1-contracts": "git+https://github.com/AztecProtocol/l1-contracts.git#v4.0.0-devnet.2-patch.1",
     "@nomicfoundation/hardhat-foundry": "^3.0.0",
     "@nomicfoundation/hardhat-ignition": "^3.1.0",
     "@nomicfoundation/hardhat-ignition-viem": "^3.1.0",
