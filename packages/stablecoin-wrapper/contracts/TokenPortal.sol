@@ -26,10 +26,13 @@ contract TokenPortal is Initializable {
 
   event Initialized(address indexed registry, bytes32 indexed l2Bridge);
 
+  /// @dev `key` and `index` match the return values from `inbox.sendL2Message` (for L2 `claim_*` and TS tooling).
   event DepositToAztec(
     uint256 indexed amount,
     bytes32 contentHash,
-    bytes32 secretHash
+    bytes32 secretHash,
+    bytes32 key,
+    uint256 index
   );
 
   event WithdrawalMessageConsumed(
@@ -77,7 +80,7 @@ contract TokenPortal is Initializable {
       secretHash
     );
 
-    emit DepositToAztec(amount, contentHash, secretHash);
+    emit DepositToAztec(amount, contentHash, secretHash, key, index);
     return (key, index);
   }
 

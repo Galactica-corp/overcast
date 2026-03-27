@@ -3,8 +3,6 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { padHex } from 'viem';
 import type { Abi } from 'viem';
-import { foundry } from 'viem/chains';
-import { createExtendedL1Client } from '@aztec/ethereum/client';
 import { TokenBridgeContract } from '../../artifacts/TokenBridge.js';
 import { PrivateStablecoinContract } from '../../artifacts/PrivateStablecoin.js';
 import { setupWallet } from '../../utils/setup_wallet.js';
@@ -12,9 +10,8 @@ import { deployTokenBridgeStack } from '../../utils/deploy_token_bridge.js';
 import { getSponsoredFPCInstance } from '../../utils/sponsored_fpc.js';
 import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
 import { createLogger } from '@aztec/foundation/log';
-import { getL1RpcUrl } from '../../../config/config.js';
 
-const runBridge = process.env.RUN_BRIDGE_DEPLOY_E2E === '1';
+const runBridge = process.env.RUN_AZTEC_E2E === '1';
 
 const e2eDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = join(e2eDir, '../../..');
@@ -40,11 +37,7 @@ function loadAbi(rel: string): Abi {
     const tokenPortalAbi = loadAbi('TokenPortal.sol/TokenPortal.json');
     const wrapperAbi = loadAbi('StablecoinWrapper.sol/StablecoinWrapper.json');
 
-    const l1 = createExtendedL1Client(
-      [getL1RpcUrl()],
-      process.env.L1_MNEMONIC ?? 'test test test test test test test test test test test junk',
-      foundry as Parameters<typeof createExtendedL1Client>[2],
-    );
+    const l1 = stack.l1Client;
 
     const registryOnChain = (await l1.readContract({
       address: stack.tokenPortal,

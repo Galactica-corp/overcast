@@ -78,3 +78,8 @@ Repo-wide conventions and per-language commands (Node, Solidity, Noir) are docum
 - validate required config early
 - do not hardcode private keys, mnemonics, or contract addresses
 - do not print sensitive values in logs
+
+## Understanding the task
+
+- To avoid misunderstandings, you can ask the user for clarification and preferences.
+- You can give options for major architecture and design decisions to discuss them before presenting a plan or implementing a feature.

@@ -17,7 +17,6 @@
     "test::devnet": "AZTEC_ENV=devnet yarn test:js",
     "test:js": "rm -rf store/pxe && NODE_NO_WARNINGS=1 NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --no-cache --runInBand --config jest.integration.config.json",
     "test:js:e2e": "RUN_AZTEC_E2E=1 yarn test:js",
-    "test:js:bridge-e2e": "RUN_BRIDGE_DEPLOY_E2E=1 RUN_AZTEC_E2E=1 yarn test:js",
     "test:nr": "aztec test"
   },
   "dependencies": {

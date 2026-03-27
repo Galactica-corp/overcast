@@ -31,7 +31,7 @@ Monorepo-wide rules (TDD, secrets, Noir hashing, MCP) live in [`AGENTS.md`](../.
 Two separate systems:
 
 - **`yarn test:nr`** — Noir / TXE via `aztec test` (no live network).
-- **`yarn test:js`** — Jest; E2E in `src/test/e2e/private_token.test.ts` runs only when **`RUN_AZTEC_E2E=1`** (`yarn test:js:e2e`). The bridge deploy wiring test in `src/test/e2e/token_bridge_deploy.test.ts` runs only when **`RUN_BRIDGE_DEPLOY_E2E=1`** (`yarn test:js:bridge-e2e`; requires L1 + Aztec local network and stablecoin-wrapper artifacts).
+- **`yarn test:js`** — Jest; E2E in `src/test/e2e/private_token.test.ts` runs only when **`RUN_AZTEC_E2E=1`** (`yarn test:js:e2e`). The bridge deploy wiring test in `src/test/e2e/token_bridge_deploy.test.ts` runs only when **`RUN_BRIDGE_DEPLOY_E2E=1`** (`yarn test:js:bridge-e2e`; requires L1 + Aztec local network and stablecoin-wrapper artifacts). The end-to-end bridge flow (L1 wrap → `claim_private` → private transfer → `exit_to_l1_private` → L1 withdraw) in `src/test/e2e/token_bridge_full_flow.test.ts` runs only when **`RUN_TOKEN_BRIDGE_FULL_E2E=1`** and **`RUN_AZTEC_E2E=1`** (`yarn test:js:token-bridge-full`; requires `aztec codegen` artifacts, Hardhat-compiled `packages/stablecoin-wrapper` contracts, and a running local network).
 - **`yarn test`** runs both `test:js` and `test:nr`.
 
 With `RUN_AZTEC_E2E=1`, start **`aztec start --local-network`** first and clear **`store/`** after network restarts.
