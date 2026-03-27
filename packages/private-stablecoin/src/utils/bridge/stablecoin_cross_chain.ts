@@ -1,4 +1,5 @@
 import { EthAddress, AztecAddress } from '@aztec/aztec.js/addresses';
+import type { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
 import { Fr } from '@aztec/aztec.js/fields';
 import { generateClaimSecret } from '@aztec/aztec.js/ethereum';
 import { waitForL1ToL2MessageReady } from '@aztec/aztec.js/messaging';
@@ -11,8 +12,11 @@ import { OutboxAbi } from '@aztec/l1-artifacts/OutboxAbi';
 import { computeL2ToL1MessageHash } from '@aztec/stdlib/hash';
 import { computeL2ToL1MembershipWitness } from '@aztec/stdlib/messaging';
 import { TxHash } from '@aztec/stdlib/tx';
+import type { EmbeddedWallet } from '@aztec/wallets/embedded';
 import type { Abi } from 'viem';
-import { toFunctionSelector } from 'viem';
+import { numberToHex, toFunctionSelector } from 'viem';
+
+import { TokenBridgeContract } from '../../artifacts/TokenBridge.js';
 
 import { getL1ChainId } from '../../../config/config.js';
 
@@ -104,6 +108,77 @@ export async function bridgeStablecoinToAztecPrivate(opts: {
 }
 
 /**
+ * Mine L1 blocks on Foundry Anvil (chain id 31337). Helps the Aztec sequencer observe finalized L1 inbox state.
+ * No-ops on other chains or if the RPC does not support `anvil_mine`.
+ */
+export async function mineAnvilL1Blocks(l1Client: ExtendedViemWalletClient, blocks: number): Promise<void> {
+    if (getL1ChainId() !== 31337 || blocks <= 0) {
+        return;
+    }
+    try {
+        await l1Client.transport.request({
+            method: 'anvil_mine',
+            params: [numberToHex(blocks)],
+        });
+    } catch {
+        // Not Anvil or method unavailable — devnet / other L1.
+    }
+}
+
+/**
+ * Mine two L2 blocks by universal-deploying `TokenBridge` twice (Aztec bridge tutorial pattern). Required so L2
+ * checkpoints advance far enough for `waitForL1ToL2MessageReady` / `claim_private` after an L1 deposit.
+ */
+export async function mineTwoL2BlocksForInboxLag(opts: {
+    wallet: EmbeddedWallet;
+    l2Token: AztecAddress;
+    tokenPortalL1: `0x${string}`;
+    from: AztecAddress;
+    sponsoredPaymentMethod: SponsoredFeePaymentMethod;
+    txTimeout: number;
+}): Promise<void> {
+    const portalEth = EthAddress.fromString(opts.tokenPortalL1);
+    for (let i = 0; i < 2; i++) {
+        const deploy = TokenBridgeContract.deploy(opts.wallet, opts.l2Token, portalEth);
+        await deploy.send({
+            from: opts.from,
+            fee: { paymentMethod: opts.sponsoredPaymentMethod },
+            wait: { timeout: opts.txTimeout },
+            contractAddressSalt: Fr.random(),
+            universalDeploy: true,
+        });
+    }
+}
+
+/**
+ * After `bridgeToAztec` on L1: advance local L1 (Anvil) + L2 so inbox messages become claimable, then wait for the
+ * node to report the message ready (checkpoint ordering).
+ */
+export async function advanceLocalChainThenWaitForL1MessageReady(opts: {
+    node: AztecNode;
+    messageHash: Fr;
+    l1Client: ExtendedViemWalletClient;
+    wallet: EmbeddedWallet;
+    l2Token: AztecAddress;
+    tokenPortalL1: `0x${string}`;
+    from: AztecAddress;
+    sponsoredPaymentMethod: SponsoredFeePaymentMethod;
+    txTimeout: number;
+    waitTimeoutSeconds: number;
+}): Promise<void> {
+    await mineAnvilL1Blocks(opts.l1Client, 2);
+    await mineTwoL2BlocksForInboxLag({
+        wallet: opts.wallet,
+        l2Token: opts.l2Token,
+        tokenPortalL1: opts.tokenPortalL1,
+        from: opts.from,
+        sponsoredPaymentMethod: opts.sponsoredPaymentMethod,
+        txTimeout: opts.txTimeout,
+    });
+    await waitForL1MessageReadyForClaim(opts.node, opts.messageHash, opts.waitTimeoutSeconds);
+}
+
+/**
  * Wait until the archiver exposes the L1→L2 message for consumption, then (optionally) you may still need rollup
  * progression; callers typically `simulate` + `send` for `claim_private` after this.
  */
@@ -112,7 +187,8 @@ export async function waitForL1MessageReadyForClaim(
     messageHash: Fr,
     timeoutSeconds = 300,
 ): Promise<void> {
-    await waitForL1ToL2MessageReady(node, messageHash, { timeoutSeconds });
+    const sec = timeoutSeconds == null || timeoutSeconds <= 0 ? 300 : timeoutSeconds;
+    await waitForL1ToL2MessageReady(node, messageHash, { timeoutSeconds: sec });
 }
 
 /**

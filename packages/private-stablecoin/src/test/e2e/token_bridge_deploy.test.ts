@@ -10,6 +10,8 @@ import { deployTokenBridgeStack } from '../../utils/deploy_token_bridge.js';
 import { getSponsoredFPCInstance } from '../../utils/sponsored_fpc.js';
 import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
 import { createLogger } from '@aztec/foundation/log';
+import { EthAddress } from '@aztec/aztec.js/addresses';
+import { Fr } from '@aztec/aztec.js/fields';
 
 const runBridge = process.env.RUN_AZTEC_E2E === '1';
 
@@ -20,6 +22,18 @@ const stablecoinArtifacts = join(packageRoot, '../stablecoin-wrapper/artifacts/c
 function loadAbi(rel: string): Abi {
   const j = JSON.parse(readFileSync(join(stablecoinArtifacts, rel), 'utf-8')) as { abi: Abi };
   return j.abi;
+}
+
+/** Simulate return for EthAddress is a plain `{ inner }` struct, not `EthAddress` (unlike AztecAddress). */
+function ethAddressFromSimulate(value: unknown): EthAddress {
+  if (value instanceof EthAddress) {
+    return value;
+  }
+  if (value !== null && typeof value === 'object' && 'inner' in value) {
+    const inner = (value as { inner: bigint | Fr }).inner;
+    return EthAddress.fromField(inner instanceof Fr ? inner : new Fr(inner));
+  }
+  throw new Error('Unexpected EthAddress value from contract simulate');
 }
 
 (runBridge ? describe : describe.skip)('Token bridge stack deploy (Aztec E2E)', () => {
@@ -81,7 +95,9 @@ function loadAbi(rel: string): Abi {
     const { result: bridgePortal } = await bridge.methods.get_portal().simulate({ from: stack.deployer.address });
 
     expect(bridgeToken.toString()).toBe(stack.l2Token.toString());
-    expect(bridgePortal.toString().toLowerCase()).toBe(stack.tokenPortal.toLowerCase());
+    expect(ethAddressFromSimulate(bridgePortal).toString().toLowerCase()).toBe(
+      stack.tokenPortal.toLowerCase(),
+    );
 
     const { result: name } = await token.methods.name().simulate({ from: stack.deployer.address });
     expect(name).toBeDefined();
