@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc -b",
     "start": "node ./dist/index.js",
+    "start:stdio": "MCP_TRANSPORT=stdio node ./dist/index.js",
     "test": "NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --config jest.config.json --runInBand"
   },
   "dependencies": {

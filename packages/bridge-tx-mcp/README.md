@@ -17,13 +17,36 @@ yarn install
 yarn workspace @galactica-net/overcast-bridge-tx-mcp build
 ```
 
-## Run (stdio)
+## How it is exposed
+
+The server supports two transports:
+
+| Transport | When to use |
+| --------- | ----------- |
+| **HTTP Stream** (default for `yarn start`) | Remote agents or tools that connect to a URL (MCP over HTTP on a TCP port). |
+| **stdio** | Editors (Cursor, Claude Desktop, etc.) that **spawn** the process and speak MCP over stdin/stdout. |
+
+Default HTTP settings: `127.0.0.1:3847`, stream path `/mcp`. Override with `MCP_PORT`, `MCP_HOST`, `MCP_ENDPOINT` (or FastMCP’s `FASTMCP_*` equivalents).
+
+## Run
+
+**HTTP Stream** (prints the URL on startup):
 
 ```bash
 yarn workspace @galactica-net/overcast-bridge-tx-mcp start
 ```
 
-Configure your MCP client to launch that command (or `node packages/bridge-tx-mcp/dist/index.js` after `build`).
+Example line:
+
+```text
+[overcast-bridge-tx-mcp] MCP HTTP Stream — connect clients to http://127.0.0.1:3847/mcp
+```
+
+**stdio** (for MCP clients that launch the binary as a subprocess):
+
+```bash
+yarn workspace @galactica-net/overcast-bridge-tx-mcp start:stdio
+```
 
 ## Test
 

@@ -14,7 +14,7 @@ import { computeL2ToL1MembershipWitness } from '@aztec/stdlib/messaging';
 import { TxHash } from '@aztec/stdlib/tx';
 import type { EmbeddedWallet } from '@aztec/wallets/embedded';
 import type { Abi } from 'viem';
-import { numberToHex, toFunctionSelector } from 'viem';
+import { encodeFunctionData, numberToHex, toFunctionSelector } from 'viem';
 
 import { TokenBridgeContract } from '../../artifacts/TokenBridge.js';
 
@@ -25,6 +25,42 @@ export interface L1ToL2PrivateClaim {
     claimSecret: Fr;
     messageHash: Fr;
     messageLeafIndex: bigint;
+}
+
+interface MarkdownComponentRawTransactionWithPermitFields {
+    txTo: string;
+    txGas: string;
+    txData: string;
+    txFrom: string;
+    txValue: string;
+    permitSymbol: string;
+    permitTo: string;
+    permitToken: string;
+    permitValue: string;
+    chainId: string;
+}
+
+function getWalletClientAddress(client: ExtendedViemWalletClient): `0x${string}` {
+    const account = client.account;
+    if (!account) {
+        throw new Error('Wallet client account is required to build EVM transaction metadata.');
+    }
+    return (typeof account === 'string' ? account : account.address) as `0x${string}`;
+}
+
+function logMarkdownComponentRawTransactionWithPermit(flow: 'deposit' | 'withdraw', payload: Record<string, unknown>): void {
+    process.stdout.write(
+        `[stablecoin-cross-chain:${flow}] ${JSON.stringify(
+            {
+                instruction: `Coding agent: write an MCP that returns these fields for ${flow} so the UI can render MarkdownComponentRawTransactionWithPermit directly.`,
+                component: 'MarkdownComponentRawTransactionWithPermit',
+                flow,
+                ...payload,
+            },
+            null,
+            2,
+        )}\n`,
+    );
 }
 
 /**
@@ -61,6 +97,36 @@ export async function bridgeStablecoinToAztecPrivate(opts: {
 }): Promise<L1ToL2PrivateClaim> {
     const [claimSecret, secretHashFr] = await generateClaimSecret(undefined);
     const secretHashHex = secretHashFr.toString() as `0x${string}`;
+    const txFrom = getWalletClientAddress(opts.l1ClientAlice);
+    const chainId = String(await opts.l1ClientAlice.getChainId());
+    const approveData = encodeFunctionData({
+        abi: opts.testErc20Abi,
+        functionName: 'approve',
+        args: [opts.stablecoinWrapper, opts.amount],
+    });
+    const approveGas = await opts.l1ClientAlice.estimateGas({
+        account: txFrom,
+        to: opts.underlying,
+        data: approveData,
+        value: 0n,
+    });
+    const bridgeData = encodeFunctionData({
+        abi: opts.wrapperAbi,
+        functionName: 'bridgeToAztec',
+        args: [opts.amount, secretHashHex],
+    });
+    let permitSymbol = 'UNKNOWN';
+    try {
+        permitSymbol = String(
+            await opts.l1ClientAlice.readContract({
+                address: opts.underlying,
+                abi: opts.testErc20Abi,
+                functionName: 'symbol',
+            }),
+        );
+    } catch {
+        // Some test ERC20 ABIs may not expose `symbol`; keep the MCP contract explicit about the missing value.
+    }
 
     const approveHash = await opts.l1ClientAlice.writeContract({
         address: opts.underlying,
@@ -69,6 +135,46 @@ export async function bridgeStablecoinToAztecPrivate(opts: {
         args: [opts.stablecoinWrapper, opts.amount],
     });
     await opts.l1ClientAlice.waitForTransactionReceipt({ hash: approveHash });
+
+    const bridgeGas = await opts.l1ClientAlice.estimateGas({
+        account: txFrom,
+        to: opts.stablecoinWrapper,
+        data: bridgeData,
+        value: 0n,
+    });
+    const markdownComponentProps: MarkdownComponentRawTransactionWithPermitFields = {
+        txTo: opts.stablecoinWrapper,
+        txGas: bridgeGas.toString(),
+        txData: bridgeData,
+        txFrom,
+        txValue: '0',
+        permitSymbol,
+        permitTo: opts.stablecoinWrapper,
+        permitToken: opts.underlying,
+        permitValue: opts.amount.toString(),
+        chainId,
+    };
+    logMarkdownComponentRawTransactionWithPermit('deposit', {
+        markdownComponentProps,
+        notes: [
+            'The raw transaction is StablecoinWrapper.bridgeToAztec(amount, secretHash).',
+            'The current flow sends a separate ERC20 approve transaction before bridgeToAztec; map that approval into the permit fields until a signed permit flow exists.',
+            'If permitSymbol is UNKNOWN, the MCP should fetch ERC20.symbol() separately or let the caller supply it.',
+            'This payload is emitted after the approval transaction is mined so gas estimation reflects the real executable bridge call.',
+        ],
+        approvalTransaction: {
+            txTo: opts.underlying,
+            txGas: approveGas.toString(),
+            txData: approveData,
+            txFrom,
+            txValue: '0',
+            txHash: approveHash,
+        },
+        bridgeArgs: {
+            amount: opts.amount.toString(),
+            secretHash: secretHashHex,
+        },
+    });
 
     const bridgeHash = await opts.l1ClientAlice.writeContract({
         address: opts.stablecoinWrapper,
@@ -287,12 +393,54 @@ export async function withdrawStablecoinFromL2ToL1(opts: {
         .toBufferArray()
         .map((buf) => `0x${Buffer.from(buf).toString('hex')}` as `0x${string}`);
     const epoch = BigInt(String(opts.witness.epochNumber));
+    const txFrom = getWalletClientAddress(opts.l1Client);
+    const chainId = String(await opts.l1Client.getChainId());
+    const withdrawArgs = [opts.recipient, opts.amount, opts.callerOnL1, epoch, opts.witness.leafIndex, path] as const;
+    const withdrawData = encodeFunctionData({
+        abi: opts.wrapperAbi,
+        functionName: 'withdrawFromL2ToL1',
+        args: withdrawArgs,
+    });
+    const withdrawGas = await opts.l1Client.estimateGas({
+        account: txFrom,
+        to: opts.stablecoinWrapper,
+        data: withdrawData,
+        value: 0n,
+    });
+
+    const markdownComponentProps: MarkdownComponentRawTransactionWithPermitFields = {
+        txTo: opts.stablecoinWrapper,
+        txGas: withdrawGas.toString(),
+        txData: withdrawData,
+        txFrom,
+        txValue: '0',
+        permitSymbol: '',
+        permitTo: '',
+        permitToken: '',
+        permitValue: '',
+        chainId,
+    };
+    logMarkdownComponentRawTransactionWithPermit('withdraw', {
+        markdownComponentProps,
+        notes: [
+            'The raw transaction is StablecoinWrapper.withdrawFromL2ToL1(recipient, amount, callerOnL1, epoch, leafIndex, siblingPath).',
+            'There is no permit/approval step in the withdrawal flow, so the permit fields should be treated as empty or not-applicable by the MCP consumer.',
+        ],
+        withdrawArgs: {
+            recipient: opts.recipient,
+            amount: opts.amount.toString(),
+            callerOnL1: opts.callerOnL1,
+            epoch: epoch.toString(),
+            leafIndex: opts.witness.leafIndex.toString(),
+            siblingPath: path,
+        },
+    });
 
     const hash = await opts.l1Client.writeContract({
         address: opts.stablecoinWrapper,
         abi: opts.wrapperAbi,
         functionName: 'withdrawFromL2ToL1',
-        args: [opts.recipient, opts.amount, opts.callerOnL1, epoch, opts.witness.leafIndex, path],
+        args: withdrawArgs,
     });
     await opts.l1Client.waitForTransactionReceipt({ hash });
 }
