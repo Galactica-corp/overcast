@@ -12,6 +12,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "resolutions": {
+    "@aztec/l1-contracts": "git+https://github.com/AztecProtocol/l1-contracts.git#v4.0.0-devnet.2-patch.1"
+  },
   "scripts": {
     "lint": "yarn lint:eslint && yarn format:check",
     "lint:eslint": "eslint .",
@@ -22,7 +25,8 @@
     "codegen:private-stablecoin": "yarn workspace @galactica-net/overcast-private-stablecoin codegen",
     "test:private-stablecoin": "yarn workspace @galactica-net/overcast-private-stablecoin test",
     "test:private-stablecoin:e2e": "yarn workspace @galactica-net/overcast-private-stablecoin test:js:e2e",
-    "test:private-stablecoin:bridge-e2e": "yarn workspace @galactica-net/overcast-private-stablecoin test:js:bridge-e2e"
+    "test:private-stablecoin:bridge-e2e": "yarn workspace @galactica-net/overcast-private-stablecoin test:js:bridge-e2e",
+    "test:bridge-tx-mcp": "yarn workspace @galactica-net/overcast-bridge-tx-mcp test"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

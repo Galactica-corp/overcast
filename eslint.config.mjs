@@ -50,6 +50,7 @@ export default tseslint.config(
     files: [
       'packages/private-stablecoin/**/*.ts',
       'packages/stablecoin-wrapper/**/*.ts',
+      'packages/bridge-tx-mcp/**/*.ts',
     ],
     extends: [tseslint.configs.recommended],
   },

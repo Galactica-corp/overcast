@@ -12,6 +12,7 @@
   "files": [],
   "references": [
     { "path": "./packages/private-stablecoin" },
-    { "path": "./packages/stablecoin-wrapper" }
+    { "path": "./packages/stablecoin-wrapper" },
+    { "path": "./packages/bridge-tx-mcp" }
   ]
 }

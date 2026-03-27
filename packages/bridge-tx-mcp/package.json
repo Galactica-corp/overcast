@@ -1,0 +1,33 @@
+{
+  "name": "@galactica-net/overcast-bridge-tx-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "description": "MCP server that builds Markdown for StablecoinWrapper bridge transactions (deposit / withdraw).",
+  "bin": "./dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "start": "node ./dist/index.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --config jest.config.json --runInBand"
+  },
+  "dependencies": {
+    "@aztec/foundation": "4.1.0-rc.4",
+    "@aztec/stdlib": "4.1.0-rc.4",
+    "fastmcp": "^3.34.0",
+    "viem": "^2.43.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^22.15.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
