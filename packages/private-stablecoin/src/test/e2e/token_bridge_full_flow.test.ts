@@ -12,7 +12,7 @@ import {
   deployTokenBridgeStack,
   loadStablecoinWrapperArtifact,
 } from '../../utils/deploy_token_bridge.js';
-import { deploySchnorrAccount } from '../../utils/deploy_account.js';
+import { deploySchnorrAccountRandom } from '../../utils/deploy_account.js';
 import { setupWallet } from '../../utils/setup_wallet.js';
 import { getSponsoredFPCInstance } from '../../utils/sponsored_fpc.js';
 import {
@@ -20,6 +20,7 @@ import {
   bridgeStablecoinToAztecPrivate,
   getWithdrawL2MessageHash,
   mintTestErc20To,
+  waitForL2BlockProvenOnL1,
   waitForL2ToL1MembershipWitness,
   withdrawStablecoinFromL2ToL1,
 } from '../../utils/bridge/stablecoin_cross_chain.js';
@@ -66,11 +67,11 @@ const logStep = (label: string, detail?: Record<string, unknown>) => {
       const bobEth = (await bobL1Client.getAddresses())[0] as `0x${string}`;
       logStep('L1 clients ready', { aliceEth, bobEth });
 
-      const aliceAccount = await deploySchnorrAccount(wallet);
-      logStep('deploySchnorrAccount alice done', { alice: aliceAccount.address.toString() });
+      const aliceAccount = await deploySchnorrAccountRandom(wallet);
+      logStep('deploySchnorrAccountRandom alice done', { alice: aliceAccount.address.toString() });
       await wallet.registerSender(aliceAccount.address, 'alice');
-      const bobAccount = await deploySchnorrAccount(wallet);
-      logStep('deploySchnorrAccount bob done', { bob: bobAccount.address.toString() });
+      const bobAccount = await deploySchnorrAccountRandom(wallet);
+      logStep('deploySchnorrAccountRandom bob done', { bob: bobAccount.address.toString() });
       await wallet.registerSender(bobAccount.address, 'bob');
       logStep('registerSender alice/bob done');
 
@@ -194,6 +195,14 @@ const logStep = (label: string, detail?: Record<string, unknown>) => {
       logStep('exit_to_l1_private send done');
 
       const exitTxHash = exitReceipt.txHash.toString();
+      const exitBlockNumber = exitReceipt.blockNumber;
+      if (exitBlockNumber === undefined) {
+        throw new Error('exit tx receipt missing blockNumber (needed for L1 outbox timing)');
+      }
+
+      logStep('waitForL2BlockProvenOnL1 starting (may block)');
+      await waitForL2BlockProvenOnL1(stack.aztecNode, exitBlockNumber, 900);
+      logStep('waitForL2BlockProvenOnL1 done');
 
       logStep('getWithdrawL2MessageHash starting');
       const withdrawMsgHash = await getWithdrawL2MessageHash(l1Deployer, stack.aztecNode, {

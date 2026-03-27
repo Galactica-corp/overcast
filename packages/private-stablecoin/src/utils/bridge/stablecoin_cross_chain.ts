@@ -229,6 +229,28 @@ export async function getWithdrawL2MessageHash(
 }
 
 /**
+ * Wait until L2 has proven at least `minBlockNumber` on L1 (rollup inserts the epoch outbox root).
+ * Required before `Outbox.consume` / `TokenPortal.withdraw`; otherwise L1 reverts with
+ * `Outbox__NothingToConsumeAtEpoch` because `roots[epoch].root` is still zero.
+ */
+export async function waitForL2BlockProvenOnL1(
+    node: AztecNode,
+    minBlockNumber: number,
+    timeoutSeconds: number,
+    intervalSeconds = 2,
+): Promise<void> {
+    await retryUntil(
+        async () => {
+            const proven = await node.getProvenBlockNumber();
+            return proven >= minBlockNumber ? true : undefined;
+        },
+        `L2 block ${minBlockNumber} proven on L1 (outbox root available)`,
+        timeoutSeconds,
+        intervalSeconds,
+    );
+}
+
+/**
  * Poll until `exit_to_l1_private` is included in a proven epoch and the membership witness exists.
  */
 export async function waitForL2ToL1MembershipWitness(

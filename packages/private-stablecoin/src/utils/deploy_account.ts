@@ -28,9 +28,64 @@ export async function registerDeployedAccountWithPxe(
   await wallet.registerContract(instance, artifact, account.getSecretKey());
 }
 
-export async function deploySchnorrAccount(wallet?: EmbeddedWallet): Promise<AccountManager> {
+async function deploySchnorrAccountWithKeys(
+  activeWallet: EmbeddedWallet,
+  secretKey: Fr,
+  salt: Fr,
+  signingKey: GrumpkinScalar,
+): Promise<AccountManager> {
   const logger: Logger = createLogger('overcast:private-stablecoin');
   const timeouts = getTimeouts();
+
+  const account = await activeWallet.createSchnorrAccount(secretKey, salt, signingKey);
+  logger.info(`Account address will be: ${account.address}`);
+
+  const { isContractPublished, isContractInitialized } =
+    await activeWallet.getContractMetadata(account.address);
+  // `isContractPublished` uses the node's public contract registry; `isContractInitialized`
+  // checks the siloed init nullifier. An account can be initialized (deploy tx landed) without
+  // the former being set — redeploying would then fail with "Invalid tx: Existing nullifier".
+  if (isContractPublished || isContractInitialized) {
+    logger.info(
+      'Account already exists on the network (skipping deployment transaction).',
+    );
+    await registerDeployedAccountWithPxe(activeWallet, account);
+    return account;
+  }
+
+  const deployMethod = await account.getDeployMethod();
+
+  logger.info('Setting up sponsored fee payment for account deployment...');
+  const sponsoredFPC = await getSponsoredFPCInstance();
+  logger.info(`Sponsored FPC at: ${sponsoredFPC.address}`);
+
+  await activeWallet.registerContract(sponsoredFPC, SponsoredFPCContractArtifact);
+  const sponsoredPaymentMethod = new SponsoredFeePaymentMethod(sponsoredFPC.address);
+
+  // Match aztec-starter e2e: account deploy via send only (see their index.test.ts beforeAll).
+  await deployMethod.send({
+    from: AztecAddress.ZERO,
+    fee: { paymentMethod: sponsoredPaymentMethod },
+    wait: { timeout: timeouts.deployTimeout },
+  });
+
+  await registerDeployedAccountWithPxe(activeWallet, account);
+
+  logger.info('Account deployment transaction completed.');
+  return account;
+}
+
+/**
+ * Deploy a Schnorr account with fresh random keys (ignores `SECRET` / `SIGNING_KEY` / `SALT`).
+ * Use when multiple distinct accounts are needed in one process (e.g. two users in an e2e test).
+ * Calling `deploySchnorrAccount` twice with `.env` keys yields the same address.
+ */
+export async function deploySchnorrAccountRandom(wallet: EmbeddedWallet): Promise<AccountManager> {
+  return deploySchnorrAccountWithKeys(wallet, Fr.random(), Fr.random(), GrumpkinScalar.random());
+}
+
+export async function deploySchnorrAccount(wallet?: EmbeddedWallet): Promise<AccountManager> {
+  const logger: Logger = createLogger('overcast:private-stablecoin');
   logger.info('Starting Schnorr account deployment...');
 
   const secretEnv = process.env.SECRET;
@@ -84,40 +139,5 @@ export async function deploySchnorrAccount(wallet?: EmbeddedWallet): Promise<Acc
   }
 
   const activeWallet = wallet ?? (await setupWallet());
-  const account = await activeWallet.createSchnorrAccount(secretKey, salt, signingKey);
-  logger.info(`Account address will be: ${account.address}`);
-
-  const { isContractPublished, isContractInitialized } =
-    await activeWallet.getContractMetadata(account.address);
-  // `isContractPublished` uses the node's public contract registry; `isContractInitialized`
-  // checks the siloed init nullifier. An account can be initialized (deploy tx landed) without
-  // the former being set — redeploying would then fail with "Invalid tx: Existing nullifier".
-  if (isContractPublished || isContractInitialized) {
-    logger.info(
-      'Account already exists on the network (skipping deployment transaction).',
-    );
-    await registerDeployedAccountWithPxe(activeWallet, account);
-    return account;
-  }
-
-  const deployMethod = await account.getDeployMethod();
-
-  logger.info('Setting up sponsored fee payment for account deployment...');
-  const sponsoredFPC = await getSponsoredFPCInstance();
-  logger.info(`Sponsored FPC at: ${sponsoredFPC.address}`);
-
-  await activeWallet.registerContract(sponsoredFPC, SponsoredFPCContractArtifact);
-  const sponsoredPaymentMethod = new SponsoredFeePaymentMethod(sponsoredFPC.address);
-
-  // Match aztec-starter e2e: account deploy via send only (see their index.test.ts beforeAll).
-  await deployMethod.send({
-    from: AztecAddress.ZERO,
-    fee: { paymentMethod: sponsoredPaymentMethod },
-    wait: { timeout: timeouts.deployTimeout },
-  });
-
-  await registerDeployedAccountWithPxe(activeWallet, account);
-
-  logger.info('Account deployment transaction completed.');
-  return account;
+  return deploySchnorrAccountWithKeys(activeWallet, secretKey, salt, signingKey);
 }
