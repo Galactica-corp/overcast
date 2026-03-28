@@ -1,0 +1,53 @@
+AppEnv: {}
+  # Dummy: 111
+
+SecretEnv: {}
+  # DUMMY: 222
+
+repo: "https://github.com/Galactica-corp/overcast"
+commitSha: "1111111"
+
+replicaCount: 1
+
+image:
+  registry: registry.fulgur.tech
+  repository: mcps/overcast
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: registry.fulgur.tech.pull
+nameOverride: "overcast-mcp"
+fullnameOverride: "overcast-mcp"
+
+ports:
+  - containerPort: 4000
+    name: http
+    protocol: TCP
+
+services:
+  "":
+    - name: http
+      port: 4000
+
+ingresses:
+  "":
+    annotations:
+      acme.cert-manager.io/http01-edit-in-place: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt"
+      cert-manager.io/issue-temporary-certificate: "true"
+
+    hosts:
+      - host: overcast.proheku.prod.fulgur.tech
+        tlsName: overcast.proheku.prod.fulgur.tech
+        path: /
+        pathType: Prefix
+        service:
+          port: 4000
+          name: ""
+resources:
+  limits:
+    cpu: 1
+    memory: 1024Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
