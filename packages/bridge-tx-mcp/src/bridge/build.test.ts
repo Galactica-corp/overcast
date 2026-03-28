@@ -1,9 +1,13 @@
+import { afterAll, describe, expect, it, jest } from '@jest/globals';
 import { encodeFunctionData } from 'viem';
 
 import { parseDecimalToBaseUnits } from './amount.js';
 import { stablecoinWrapperAbi } from './abis.js';
-import { buildWithdrawTransaction } from './build.js';
+import { buildDepositTransaction, buildWithdrawTransaction } from './build.js';
 import { parseMembershipWitnessJson } from './witness.js';
+
+/** `bridgeToAztec` selector — must match calldata produced by the deposit path. */
+const BRIDGE_TO_AZTEC_SELECTOR = '0x0b16b700';
 
 describe('parseMembershipWitnessJson', () => {
   it('throws on invalid JSON', () => {
@@ -69,5 +73,61 @@ describe('calldata fixtures', () => {
     });
     const txData = /txData="(0x[a-fA-F0-9]+)"/.exec(result.markdown)?.[1];
     expect(txData?.toLowerCase()).toBe(FIXTURE_WITHDRAW_DATA.toLowerCase());
+  });
+});
+
+/**
+ * Exercises `generateDepositClaimPair` → Poseidon via @aztec/bb.js (native or WASM fallback).
+ * Catches missing `bb` binary, broken musl/glibc images, and absent wasm assets.
+ */
+describe('deposit path smoke', () => {
+  jest.setTimeout(120_000);
+
+  afterAll(async () => {
+    const { Barretenberg } = await import('@aztec/bb.js');
+    await Barretenberg.destroySingleton().catch(() => undefined);
+  });
+
+  it('buildDepositTransaction returns consistent markdown, claim data, and calldata', async () => {
+    const tokenAddress = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+    const wrapperAddress = '0xb0d4afd8879ed9f52b28595d31b441d079b2ca07';
+    const userEvmAddress = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
+
+    const result = await buildDepositTransaction({
+      tokenAddress,
+      wrapperAddress,
+      userEvmAddress,
+      userAztecAddress: '0x00',
+      amountDecimal: '1.0',
+      chainId: '31337',
+      tokenDecimals: 18,
+      permitSymbol: 'TST',
+    });
+
+    const expectedAmountWei = (10n ** 18n).toString();
+    expect(result.claimData.claimAmount).toBe(expectedAmountWei);
+    expect(result.bridgeArgs.amount).toBe(expectedAmountWei);
+    expect(result.claimData.messageHash).toBeUndefined();
+    expect(result.claimData.messageLeafIndex).toBeUndefined();
+
+    expect(result.claimData.claimSecret).toMatch(/^0x[0-9a-f]{64}$/i);
+    expect(result.bridgeArgs.secretHash).toMatch(/^0x[0-9a-f]{64}$/i);
+
+    expect(result.markdown).toContain(`txTo="${wrapperAddress}"`);
+    expect(result.markdown).toContain(`chainId="31337"`);
+    expect(result.markdown.toLowerCase()).toContain(BRIDGE_TO_AZTEC_SELECTOR.slice(2));
+
+    const expectedBridgeData = encodeFunctionData({
+      abi: stablecoinWrapperAbi,
+      functionName: 'bridgeToAztec',
+      args: [BigInt(expectedAmountWei), result.bridgeArgs.secretHash as `0x${string}`],
+    });
+    const bridgeTxData = /txData="(0x[a-fA-F0-9]+)"/.exec(result.markdown)?.[1];
+    expect(bridgeTxData?.toLowerCase()).toBe(expectedBridgeData.toLowerCase());
+
+    expect(result.approvalMarkdown).toBeDefined();
+    expect(result.approvalMarkdown!).toContain(`txTo="${tokenAddress}"`);
+    const approveTxData = /txData="(0x[a-fA-F0-9]+)"/.exec(result.approvalMarkdown!)?.[1];
+    expect(approveTxData?.toLowerCase().startsWith('0x095ea7b3')).toBe(true);
   });
 });
