@@ -11,7 +11,7 @@ replicaCount: 1
 
 image:
   registry: registry.fulgur.tech
-  repository: mcps/overcast
+  repository: mcps/overcast-mcp
   pullPolicy: Always
 
 imagePullSecrets:
@@ -37,8 +37,8 @@ ingresses:
       cert-manager.io/issue-temporary-certificate: "true"
 
     hosts:
-      - host: overcast.proheku.prod.fulgur.tech
-        tlsName: overcast.proheku.prod.fulgur.tech
+      - host: overcast-mcp.proheku.prod.fulgur.tech
+        tlsName: overcast-mcp.proheku.prod.fulgur.tech
         path: /
         pathType: Prefix
         service:

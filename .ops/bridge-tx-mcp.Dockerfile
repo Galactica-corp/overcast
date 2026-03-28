@@ -22,10 +22,12 @@ FROM deps AS builder
 
 COPY packages/bridge-tx-mcp/ ./packages/bridge-tx-mcp/
 
-# Build the specific workspace
+# Build only the specific workspace we need
 RUN yarn workspace @galactica-net/overcast-bridge-tx-mcp build
 
 FROM node:24-bookworm-slim AS runner
+
+RUN corepack enable yarn && corepack prepare yarn@4.13.0 --activate
 
 WORKDIR /app
 
