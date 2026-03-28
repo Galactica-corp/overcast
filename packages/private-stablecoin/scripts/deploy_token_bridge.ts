@@ -7,10 +7,12 @@ import {
 import { mintTestErc20To } from '../src/utils/bridge/stablecoin_cross_chain.js';
 import { formatFrontendDeploymentConfig } from '../src/utils/frontend_deployment_config.js';
 import { Fr } from '@aztec/aztec.js/fields';
-import { getAddress, parseUnits } from 'viem';
+import { getAddress, parseEther, parseUnits } from 'viem';
 
 const TEST_TOKEN_MINT_TO_ENV = 'L1_TEST_TOKEN_MINT_TO';
 const TEST_TOKEN_MINT_AMOUNT = parseUnits('10000', 18);
+const TEST_NATIVE_GAS_ETH_ENV = 'L1_TEST_TOKEN_NATIVE_GAS_ETH';
+const DEFAULT_TEST_NATIVE_GAS_AMOUNT = parseEther('0.01');
 
 function getOptionalEnv(name: string): string | undefined {
     const value = process.env[name]?.trim();
@@ -36,6 +38,15 @@ function getDecimalsFromEnv(name: string, fallback: number): number {
     return parsed;
 }
 
+function getNativeGasAmount(): bigint {
+    const value = getOptionalEnv(TEST_NATIVE_GAS_ETH_ENV);
+    if (!value) {
+        return DEFAULT_TEST_NATIVE_GAS_AMOUNT;
+    }
+
+    return parseEther(value);
+}
+
 async function main() {
     const logger = createLogger('overcast:deploy:token-bridge');
     const wallet = await setupWallet();
@@ -45,6 +56,7 @@ async function main() {
     const saltToken = getSaltFromEnv('BRIDGE_SALT_TOKEN') ?? Fr.random();
     const saltBridge = getSaltFromEnv('BRIDGE_SALT_BRIDGE') ?? Fr.random();
     const mintRecipient = process.env[TEST_TOKEN_MINT_TO_ENV]?.trim();
+    const nativeGasAmount = getNativeGasAmount();
 
     const result = await deployTokenBridgeStack({
         wallet,
@@ -71,6 +83,18 @@ async function main() {
         logger.info(
             `Minted ${TEST_TOKEN_MINT_AMOUNT.toString()} test tokens to ${normalizedMintRecipient}.`,
         );
+
+        if (nativeGasAmount > 0n) {
+            const nativeFundingHash = await result.l1Client.sendTransaction({
+                to: normalizedMintRecipient,
+                value: nativeGasAmount,
+            });
+            await result.l1Client.waitForTransactionReceipt({ hash: nativeFundingHash });
+
+            logger.info(
+                `Sent ${nativeGasAmount.toString()} native gas wei to ${normalizedMintRecipient}.`,
+            );
+        }
     }
 
     logger.info('Deployment complete.');
