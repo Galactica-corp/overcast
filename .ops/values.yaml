@@ -11,7 +11,7 @@ replicaCount: 1
 
 image:
   registry: registry.fulgur.tech
-  repository: mcps/overcast
+  repository: mcps/overcast-mcp
   pullPolicy: Always
 
 imagePullSecrets:
