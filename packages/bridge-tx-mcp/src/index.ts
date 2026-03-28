@@ -1,6 +1,22 @@
 #!/usr/bin/env node
 import { createBridgeMcpServer } from './server.js';
 
+/**
+ * FastMCP HTTP uses mcp-proxy. In stateful mode, a second `initialize` on the same
+ * session makes StreamableHTTPServerTransport throw "Server already initialized"
+ * (common with some gateways / clients). Stateless mode avoids session stickiness.
+ *
+ * Default: stateless unless FASTMCP_STATELESS or MCP_HTTP_STATELESS is explicitly `false`.
+ * Matches FastMCP CLI: FASTMCP_STATELESS=true
+ */
+function isHttpStreamStateless(): boolean {
+    const v = process.env.FASTMCP_STATELESS ?? process.env.MCP_HTTP_STATELESS ?? '';
+    if (v === 'false' || v === '0') {
+        return false;
+    }
+    return true;
+}
+
 const server = createBridgeMcpServer();
 
 /** Many editors spawn MCP over stdio; agents testing manually often want HTTP Stream. */
@@ -30,6 +46,7 @@ if (useStdio) {
             port,
             host,
             endpoint,
+            stateless: isHttpStreamStateless(),
         },
     });
 

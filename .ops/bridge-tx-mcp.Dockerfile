@@ -43,7 +43,8 @@ COPY --from=builder --chown=nodejs:nodejs /app/packages/bridge-tx-mcp/dist ./pac
 ENV NODE_ENV=production \
   NODE_NO_WARNINGS=1 \
   MCP_HOST=0.0.0.0 \
-  MCP_PORT=4000
+  MCP_PORT=4000 \
+  FASTMCP_STATELESS=true
 
 USER nodejs
 
