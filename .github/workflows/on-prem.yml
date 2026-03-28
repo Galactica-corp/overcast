@@ -1,0 +1,36 @@
+name: Build, Push, Deploy (onprem)
+
+on:
+  push:
+    branches:
+      - main
+      - persai
+  workflow_dispatch:
+
+env:
+  REGISTRY: registry.fulgur.tech
+  IMAGE_NAME: mcps/overcast
+jobs:
+  build_deploy:
+    runs-on: ci
+    steps:
+      - uses: AutoModality/action-clean@v1
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          registry: registry.fulgur.tech
+
+      - name: deploy
+        env:
+          SOPS_CI_KEY: ${{ secrets.SOPS_CI_KEY }}
+        run: |
+          export KUBECONFIG="$RUNNER_TEMP/kube-${{ github.run_id }}-${{ github.job }}.yaml"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d | gzip -d > "$KUBECONFIG" && chmod 600 $KUBECONFIG && echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
+          make cd
+      - name: clean up
+        if: always()
+        run: |
+          gpg -K --with-colons | awk -F: '/^(fpr)/ {print $10; exit}' | xargs gpg --delete-secret-and-public-keys --yes --batch
+          rm -rf "$KUBECONFIG"

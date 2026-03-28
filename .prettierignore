@@ -23,3 +23,5 @@ proofs
 # Aztec PXE / codegen (private-stablecoin)
 store
 codegenCache.json
+
+Makefile
