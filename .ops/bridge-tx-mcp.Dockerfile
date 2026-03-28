@@ -5,36 +5,49 @@ RUN corepack enable yarn && corepack prepare yarn@4.13.0 --activate
 
 WORKDIR /app
 
-COPY package.json yarn.lock .yarnrc.yml ./
+COPY package.json yarn.lock .yarnrc.yml tsconfig.json ./
 COPY .yarn/ .yarn/
-RUN yarn install --immutable
+
+# Copy all workspace package.json files before install
+# This allows Yarn to properly resolve the workspace structure
+COPY packages/bridge-tx-mcp/package.json ./packages/bridge-tx-mcp/
+COPY packages/private-stablecoin/package.json ./packages/private-stablecoin/
+COPY packages/stablecoin-wrapper/package.json ./packages/stablecoin-wrapper/
+
+# Install dependencies without running scripts (some packages need source code for postinstall)
+RUN yarn install --mode=skip-build
 
 COPY scripts/ ./scripts/
 COPY packages/ ./packages/
 
-# Build the specific workspace
+# Build only the specific workspace we need
 RUN yarn workspace @galactica-net/overcast-bridge-tx-mcp build
 
 # Stage 2: Production runtime stage
 FROM node:24-alpine AS runner
 
+RUN corepack enable yarn && corepack prepare yarn@4.13.0 --activate
+
 WORKDIR /app
 
 # Create non-root user for security
-RUN addgroup --system --gid 1001 nodejs && \
-  adduser --system --uid 1001 --gid nodejs nodejs
+RUN addgroup -S -g 1001 nodejs && \
+  adduser -S -G nodejs -u 1001 nodejs
 
-# Copy Yarn cache from builder
-COPY --from=builder --chown=nodejs:nodejs /app/.yarn/cache /app/.yarn/cache
-COPY --from=builder --chown=nodejs:nodejs /app/.yarn/releases /app/.yarn/releases
-COPY --from=builder --chown=nodejs:nodejs /app/.yarn/state /app/.yarn/state
+# Copy Yarn configuration and dependencies
+COPY --from=builder --chown=nodejs:nodejs /app/.yarn ./.yarn
+COPY --from=builder --chown=nodejs:nodejs /app/.yarnrc.yml ./.yarnrc.yml
+COPY --from=builder --chown=nodejs:nodejs /app/yarn.lock ./yarn.lock
+COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
 
-# Copy package.json for metadata
-COPY --from=builder --chown=nodejs:nodejs package.json ./
+# Copy workspace package.json files
+COPY --from=builder --chown=nodejs:nodejs /app/packages/bridge-tx-mcp/package.json ./packages/bridge-tx-mcp/package.json
+
+# Copy node_modules if using node-modules linker, or .pnp files if using PnP
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Copy the built artifacts from builder
 COPY --from=builder --chown=nodejs:nodejs /app/packages/bridge-tx-mcp/dist ./packages/bridge-tx-mcp/dist
-COPY --from=builder --chown=nodejs:nodejs /app/packages/bridge-tx-mcp/src ./packages/bridge-tx-mcp/src
 
 # Set up environment variables
 ENV NODE_ENV=production \
