@@ -227,7 +227,7 @@ export async function mineAnvilL1Blocks(l1Client: ExtendedViemWalletClient, bloc
       params: [numberToHex(blocks)],
     });
   } catch {
-    // Not Anvil or method unavailable — devnet / other L1.
+    // Not Anvil or method unavailable — public testnet / other L1.
   }
 }
 

@@ -15,8 +15,8 @@
     "test": "NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --config jest.config.json --runInBand"
   },
   "dependencies": {
-    "@aztec/foundation": "4.1.0-rc.4",
-    "@aztec/stdlib": "4.1.0-rc.4",
+    "@aztec/foundation": "4.1.0-rc.2",
+    "@aztec/stdlib": "4.1.0-rc.2",
     "fastmcp": "^3.34.0",
     "viem": "^2.43.0",
     "zod": "^3.24.0"

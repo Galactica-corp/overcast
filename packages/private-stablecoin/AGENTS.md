@@ -24,7 +24,7 @@ Monorepo-wide rules (TDD, secrets, Noir hashing, MCP) live in [`AGENTS.md`](../.
 - **Do not commit** generated trees: `target/` (repo root), `src/artifacts/`, `store/`, `codegenCache.json`.
 - **Never hand-edit** generated `src/artifacts/*.ts`; they come from `yarn codegen`. Regenerate after changing Noir contracts under `crates/`.
 - **L1 + bridge deploy (local):** compile Solidity in `packages/stablecoin-wrapper` (`yarn exec hardhat compile`), then with `aztec start --local-network` running: `yarn deploy:bridge` (see [`scripts/deploy_token_bridge.ts`](./scripts/deploy_token_bridge.ts)).
-- **Devnet:** set `AZTEC_ENV=devnet` (e.g. `yarn workspace @galactica-net/overcast-private-stablecoin deploy::devnet`) to use [`config/devnet.json`](./config/devnet.json).
+- **Aztec testnet:** set `AZTEC_ENV=testnet` (e.g. `yarn workspace @galactica-net/overcast-private-stablecoin deploy::testnet`) to use [`config/testnet.json`](./config/testnet.json) ([network docs](https://docs.aztec.network/networks)).
 
 ## Testing
 

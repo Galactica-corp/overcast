@@ -9,7 +9,7 @@ Aztec **Noir** contract package for the Overcast **private stablecoin prototype*
 
 ## Version alignment (keep in lockstep)
 
-1. **Aztec CLI** / toolchain — e.g. `VERSION=4.0.0-devnet.2-patch.1` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
+1. **Aztec CLI** / toolchain — e.g. `VERSION=4.1.0-rc.2` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
 2. **`aztec-nr` git tag** in [`Nargo.toml`](./Nargo.toml).
 3. **`@aztec/*` npm** versions in [`package.json`](./package.json).
 

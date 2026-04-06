@@ -11,6 +11,10 @@ export interface NetworkConfig {
   nodeUrl: string;
   l1RpcUrl: string;
   l1ChainId: number;
+  /** Aztec L2 rollup version (see https://docs.aztec.network/networks). */
+  rollupVersion?: number;
+  /** HTTP URL to the bootnode list JSON for this network. */
+  bootnodesUrl?: string;
 }
 
 export interface TimeoutConfig {
@@ -21,7 +25,7 @@ export interface TimeoutConfig {
 
 export interface EnvironmentConfig {
   name: string;
-  environment: 'local' | 'testnet' | 'devnet' | 'mainnet';
+  environment: 'local' | 'testnet' | 'mainnet';
   network: NetworkConfig;
   settings: {
     skipLocalNetwork: boolean;
@@ -67,8 +71,8 @@ export class ConfigManager {
     return this.config.network;
   }
 
-  public isDevnet(): boolean {
-    return this.config.environment === 'devnet';
+  public isAztecTestnet(): boolean {
+    return this.config.environment === 'testnet';
   }
 
   public isLocalNetwork(): boolean {
@@ -87,7 +91,7 @@ export class ConfigManager {
     if (this.config.timeouts) {
       return this.config.timeouts;
     }
-    if (this.isDevnet()) {
+    if (this.isAztecTestnet()) {
       return {
         deployTimeout: 1200000,
         txTimeout: 180000,

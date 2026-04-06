@@ -61,4 +61,4 @@ _To be added once unit, integration, and network tests are wired up._
 
 ## Deployment
 
-_To be added for target environments (local devnet, testnet, production) and contract/circuit deployment steps._
+_To be added for target environments (local network, Aztec testnet, production) and contract/circuit deployment steps._

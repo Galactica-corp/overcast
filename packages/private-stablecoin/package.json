@@ -11,27 +11,27 @@
     "codegen": "aztec codegen ../../target --outdir src/artifacts",
     "compile": "cd ../.. && aztec compile --workspace",
     "deploy": "NODE_NO_WARNINGS=1 yarn exec tsx scripts/deploy_contract.ts",
-    "deploy::devnet": "NODE_NO_WARNINGS=1 AZTEC_ENV=devnet yarn exec tsx scripts/deploy_contract.ts",
+    "deploy::testnet": "NODE_NO_WARNINGS=1 AZTEC_ENV=testnet yarn exec tsx scripts/deploy_contract.ts",
     "deploy:bridge": "NODE_NO_WARNINGS=1 yarn exec tsx scripts/deploy_token_bridge.ts",
     "test": "yarn test:js && yarn test:nr",
-    "test::devnet": "AZTEC_ENV=devnet yarn test:js",
+    "test::testnet": "AZTEC_ENV=testnet yarn test:js",
     "test:js": "rm -rf store/pxe && NODE_NO_WARNINGS=1 NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --no-cache --runInBand --config jest.integration.config.json",
     "test:js:e2e": "RUN_AZTEC_E2E=1 yarn test:js",
     "test:nr": "aztec test"
   },
   "dependencies": {
-    "@aztec/accounts": "4.1.0-rc.4",
-    "@aztec/aztec.js": "4.1.0-rc.4",
-    "@aztec/constants": "4.1.0-rc.4",
-    "@aztec/entrypoints": "4.1.0-rc.4",
-    "@aztec/ethereum": "4.1.0-rc.4",
-    "@aztec/foundation": "4.1.0-rc.4",
-    "@aztec/noir-contracts.js": "4.1.0-rc.4",
-    "@aztec/protocol-contracts": "4.1.0-rc.4",
-    "@aztec/pxe": "4.1.0-rc.4",
-    "@aztec/stdlib": "4.1.0-rc.4",
-    "@aztec/wallet-sdk": "4.1.0-rc.4",
-    "@aztec/wallets": "4.1.0-rc.4",
+    "@aztec/accounts": "4.1.0-rc.2",
+    "@aztec/aztec.js": "4.1.0-rc.2",
+    "@aztec/constants": "4.1.0-rc.2",
+    "@aztec/entrypoints": "4.1.0-rc.2",
+    "@aztec/ethereum": "4.1.0-rc.2",
+    "@aztec/foundation": "4.1.0-rc.2",
+    "@aztec/noir-contracts.js": "4.1.0-rc.2",
+    "@aztec/protocol-contracts": "4.1.0-rc.2",
+    "@aztec/pxe": "4.1.0-rc.2",
+    "@aztec/stdlib": "4.1.0-rc.2",
+    "@aztec/wallet-sdk": "4.1.0-rc.2",
+    "@aztec/wallets": "4.1.0-rc.2",
     "dotenv": "^17.2.2",
     "viem": "^2.43.0"
   },
@@ -50,7 +50,7 @@
     "testTimeout": 200000
   },
   "config": {
-    "aztecVersion": "4.1.0-rc.4"
+    "aztecVersion": "4.1.0-rc.2"
   },
   "engines": {
     "node": ">=22"

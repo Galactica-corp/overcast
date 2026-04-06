@@ -7,7 +7,7 @@ export async function setupWallet(): Promise<EmbeddedWallet> {
   const node = createAztecNodeClient(nodeUrl);
   const wallet = await EmbeddedWallet.create(node, {
     ephemeral: true,
-    // Local + devnet: prover helps PXE resolve account keys for private calls (e.g. PrivateToken admin note).
+    // Local + remote testnet: prover helps PXE resolve account keys for private calls (e.g. PrivateToken admin note).
     pxeConfig: { proverEnabled: true },
   });
   return wallet;
