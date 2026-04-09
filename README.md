@@ -14,14 +14,16 @@ Protocol detail: [`docs/overcast_protocol_architecture.md`](docs/overcast_protoc
 
 ### Monorepo packages
 
+
 | Package                                      | Path                                                         | Role                                                                 |
 | -------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------- |
 | `@galactica-net/overcast-stablecoin-wrapper` | [`packages/stablecoin-wrapper`](packages/stablecoin-wrapper) | Solidity L1 wrapping / portal-style contracts                        |
 | `@galactica-net/overcast-private-stablecoin` | [`packages/private-stablecoin`](packages/private-stablecoin) | **All Aztec Noir** — private token, token bridge, shared Noir crates |
 
+
 [`packages/private-stablecoin`](packages/private-stablecoin) holds every Noir crate (token, bridge, libraries such as portal content hash and helpers under `crates/`). The former top-level `packages/token-bridge` workspace is gone; use that package’s [`README.md`](packages/private-stablecoin/README.md) and [`AGENTS.md`](packages/private-stablecoin/AGENTS.md) for compile, test, and layout.
 
-For Aztec fee bootstrapping (bridging + claiming FeeJuice into a PrivateFPC), see the “Fee Juice setup (PrivateFPC)” section in [`packages/private-stablecoin/README.md`](packages/private-stablecoin/README.md).
+For Aztec fee bootstrapping (bridging + claiming FeeJuice into a PrivateFPC), see the “Fee Juice setup (PrivateFPC)” section in `[packages/private-stablecoin/README.md](packages/private-stablecoin/README.md)`.
 
 ---
 
@@ -31,18 +33,15 @@ This repository uses **[Yarn 4](https://yarnpkg.com/)** (Berry). The required ve
 
 1. **Node.js** — use a current LTS release (18+ or 20+ recommended).
 2. **Enable Corepack** (ships with Node 16.10+):
-
-   ```bash
+  ```bash
    corepack enable
-   ```
-
+  ```
 3. **Clone** the repo and **install** from the root (Corepack will pick up Yarn 4 from `packageManager`):
-
-   ```bash
+  ```bash
    git clone https://github.com/Galactica-corp/overcast.git
    cd overcast
    yarn install
-   ```
+  ```
 
 If Corepack is disabled or Yarn does not match the repo, run `yarn set version 4` once in the project root, then `yarn install` again.
 
@@ -51,16 +50,16 @@ Per-package toolchains (Foundry, Nargo, Aztec sandbox, etc.) will be documented 
 ### Development setup
 
 - **Lint & format (Node / shared files):** from the repo root, run `yarn lint` (ESLint + Prettier check) and `yarn format` to apply Prettier. Solidity and Noir use their own tools as well—see [`docs/linting.md`](docs/linting.md).
-- **AI / agent tooling:** install the **Aztec** and **Noir** MCP servers for editors that support MCP (code search, docs, examples, version-aware context). Follow Aztec’s guide: **[AI tooling — MCP servers](https://docs.aztec.network/developers/ai_tooling#mcp-servers)**. Repository-level guidance for humans and agents lives in [`AGENTS.md`](AGENTS.md).
+- **AI / agent tooling:** install the **Aztec** and **Noir** MCP servers for editors that support MCP (code search, docs, examples, version-aware context). Follow Aztec’s guide: **[AI tooling — MCP servers](https://docs.aztec.network/developers/ai_tooling#mcp-servers)**. Repository-level guidance for humans and agents lives in `[AGENTS.md](AGENTS.md)`.
 
 ---
 
 ## Testing
 
-_To be added once unit, integration, and network tests are wired up._
+*To be added once unit, integration, and network tests are wired up.*
 
 ---
 
 ## Deployment
 
-_To be added for target environments (local network, Aztec testnet, production) and contract/circuit deployment steps._
+*To be added for target environments (local network, Aztec testnet, production) and contract/circuit deployment steps.*

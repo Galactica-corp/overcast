@@ -4,7 +4,7 @@ Aztec **Noir** contract package for the Overcast **private stablecoin prototype*
 
 ## Upstream fork
 
-- **`src/main.nr`** is derived from Defi-Wonderland's [`token_contract`](https://github.com/defi-wonderland/aztec-standards/tree/dev/src/token_contract). The Nargo crate is named `private_stablecoin`.
+ - **`src/main.nr`** is derived from Defi-Wonderland's [`token_contract`](https://github.com/defi-wonderland/aztec-standards/tree/dev/src/token_contract). The Nargo crate is named `private_stablecoin`.
 - **Tooling layout** (Jest E2E, `config/*.json`, scripts, workspace scripts) is modeled on [AztecProtocol/aztec-starter](https://github.com/AztecProtocol/aztec-starter) (`next`), which is **MIT**-licensed—attribute that repo separately from the Apache-2.0 contract source.
 
 ## Version alignment (keep in lockstep)
@@ -41,20 +41,22 @@ If you **restart** the local network, delete PXE state: `yarn workspace @galacti
 
 ## Workspace commands
 
-| Command (from repo root)                                            | Purpose                   |
-| ------------------------------------------------------------------- | ------------------------- |
-| `yarn workspace @galactica-net/overcast-private-stablecoin compile` | `aztec compile`           |
-| `yarn workspace @galactica-net/overcast-private-stablecoin codegen` | Generate `src/artifacts/` |
-| `yarn workspace @galactica-net/overcast-private-stablecoin test`    | Jest E2E + `aztec test`   |
-| `yarn workspace @galactica-net/overcast-private-stablecoin deploy`  | Example deploy script     |
+
+| Command (from repo root)                                                             | Purpose                           |
+| ------------------------------------------------------------------------------------ | --------------------------------- |
+| `yarn workspace @galactica-net/overcast-private-stablecoin compile`                  | `aztec compile`                   |
+| `yarn workspace @galactica-net/overcast-private-stablecoin codegen`                  | Generate `src/artifacts/`         |
+| `yarn workspace @galactica-net/overcast-private-stablecoin test`                     | Jest E2E + `aztec test`           |
+| `yarn workspace @galactica-net/overcast-private-stablecoin deploy`                   | Example deploy script             |
 | `yarn workspace @galactica-net/overcast-private-stablecoin fee-juice:setup::testnet` | Bridge + claim FeeJuice (testnet) |
 | `yarn workspace @galactica-net/overcast-private-stablecoin fee-juice:setup::mainnet` | Bridge + claim FeeJuice (mainnet) |
+
 
 Shorter aliases: `yarn compile:private-stablecoin`, `yarn test:private-stablecoin` (root `package.json`).
 
 ## Agent / contributor docs
 
-See [`AGENTS.md`](./AGENTS.md) for simulate-before-send, testing split, and store cleanup.
+See `[AGENTS.md](./AGENTS.md)` for simulate-before-send, testing split, and store cleanup.
 
 ## Fee Juice setup (PrivateFPC)
 
@@ -87,3 +89,4 @@ The script prints a JSON blob with `secret`, `secretHash`, and `leafIndex` (need
 ```bash
 cd packages/private-stablecoin && nargo fmt --check
 ```
+
