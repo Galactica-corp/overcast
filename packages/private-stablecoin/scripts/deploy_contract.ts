@@ -69,14 +69,13 @@ async function main() {
         address,
     );
     await deployRequest.simulate({ from: address });
-    const { receipt } = await deployRequest.send({
+    const { contract: token } = await deployRequest.send({
         from: address,
         fee: { paymentMethod: sponsoredPaymentMethod },
-        wait: { timeout: timeouts.deployTimeout, returnReceipt: true },
+        wait: { timeout: timeouts.deployTimeout },
         contractAddressSalt: tokenSalt,
         universalDeploy: true,
     });
-    const token = receipt.contract;
 
     const initialSupply = 1000n;
     await token.methods.mint_to_public(address, initialSupply).simulate({ from: address });
@@ -98,14 +97,13 @@ async function main() {
     const portalAddress = EthAddress.fromString(tokenPortalAddress);
     const bridgeDeploy = TokenBridgeContract.deploy(wallet, token.address, portalAddress);
     await bridgeDeploy.simulate({ from: address });
-    const { receipt: bridgeReceipt } = await bridgeDeploy.send({
+    const { contract: bridge } = await bridgeDeploy.send({
         from: address,
         fee: { paymentMethod: sponsoredPaymentMethod },
-        wait: { timeout: timeouts.deployTimeout, returnReceipt: true },
+        wait: { timeout: timeouts.deployTimeout },
         contractAddressSalt: bridgeSalt,
         universalDeploy: true,
     });
-    const bridge = bridgeReceipt.contract;
 
     await token.methods.set_minter(bridge.address).simulate({ from: address });
     await token.methods.set_minter(bridge.address).send({

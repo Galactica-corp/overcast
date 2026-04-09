@@ -192,6 +192,7 @@ pub contract PrivateStablecoin {
         PartialUintNote::from_field(commitment).complete_from_private(
             self.context,
             completer,
+            self.storage.private_balances.get_storage_slot(),
             amount,
         );
     }
@@ -406,6 +407,7 @@ pub contract PrivateStablecoin {
     fn mint_to_commitment(commitment: Field, amount: u128) {
         let completer = self.msg_sender();
         _validate_minter(completer, self.storage.minter.read());
+
         self.internal._increase_total_supply(amount);
         self.internal._increase_commitment_balance(
             PartialUintNote::from_field(commitment),
@@ -539,7 +541,12 @@ pub contract PrivateStablecoin {
         completer: AztecAddress,
         amount: u128,
     ) {
-        commitment.complete(self.context, completer, amount);
+        commitment.complete(
+            self.context,
+            completer,
+            self.storage.private_balances.get_storage_slot(),
+            amount,
+        );
     }
 
     /// @notice Subtracts balance from private balance
@@ -591,13 +598,7 @@ pub contract PrivateStablecoin {
         to: AztecAddress,
         completer: AztecAddress,
     ) -> PartialUintNote {
-        let commitment = UintNote::partial(
-            to,
-            self.storage.private_balances.get_storage_slot(),
-            self.context,
-            to,
-            completer,
-        );
+        let commitment = UintNote::partial(to, self.context, to, completer);
 
         commitment
     }

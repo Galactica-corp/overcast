@@ -49,12 +49,14 @@ describe("TokenPortal", async function () {
 
     const harness = await viem.deployContract("TokenPortalContentHashHarness");
     const expectedContent = await harness.read.mintToPrivateContentHash([amount]);
+    const expectedKey = pad(toHex(0), { size: 32 });
+    const expectedIndex = 1n;
 
     await viem.assertions.emitWithArgs(
       portal.write.depositToAztec([amount, secretHash], { account: user.account }),
       portal,
       "DepositToAztec",
-      [amount, expectedContent, secretHash],
+      [amount, expectedContent, secretHash, expectedKey, expectedIndex],
     );
 
     assert.equal(await inbox.read.lastContent(), expectedContent);

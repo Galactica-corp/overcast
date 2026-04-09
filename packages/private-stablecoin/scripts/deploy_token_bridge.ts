@@ -21,7 +21,7 @@ const TEST_NATIVE_GAS_ETH_ENV = 'L1_TEST_TOKEN_NATIVE_GAS_ETH';
 const TEST_TOKEN_MINT_AMOUNT = parseUnits('10000', 18);
 const DEFAULT_TEST_NATIVE_GAS_AMOUNT = parseEther('0.01');
 const CREATOR_BRIDGE_AMOUNT = parseUnits('1000', 18);
-const BRIDGE_CLAIM_RECIPIENT = '0x1250c3a3217014e521e5ec9bf906b2f6bd09fe74ee6fdbf6c02aa6e80baef546';
+const BRIDGE_CLAIM_RECIPIENT = '0x283975b880124118d6f881d79677e7df1a80a3f5726404c44167b4589c44721c';
 
 function getOptionalEnv(name: string): string | undefined {
     const value = process.env[name]?.trim();

@@ -169,26 +169,25 @@ export async function deployL2PrivateStablecoinAndBridge(
     admin,
   );
   await tokenDeploy.simulate({ from: admin });
-  const { receipt: tokenReceipt } = await tokenDeploy.send({
+  const { contract: tokenContract } = await tokenDeploy.send({
     from: admin,
     fee: { paymentMethod: sponsoredPaymentMethod },
-    wait: { timeout: timeouts.deployTimeout, returnReceipt: true },
+    wait: { timeout: timeouts.deployTimeout },
     contractAddressSalt: saltToken,
     universalDeploy: true,
   });
-  const tokenContract = tokenReceipt.contract;
   const l2Token = tokenContract.address;
 
   const bridgeDeploy = TokenBridgeContract.deploy(wallet, l2Token, portalEth);
   await bridgeDeploy.simulate({ from: admin });
-  const { receipt: bridgeReceipt } = await bridgeDeploy.send({
+  const { contract: bridgeContract } = await bridgeDeploy.send({
     from: admin,
     fee: { paymentMethod: sponsoredPaymentMethod },
-    wait: { timeout: timeouts.deployTimeout, returnReceipt: true },
+    wait: { timeout: timeouts.deployTimeout },
     contractAddressSalt: saltBridge,
     universalDeploy: true,
   });
-  const l2Bridge = bridgeReceipt.contract.address;
+  const l2Bridge = bridgeContract.address;
 
   await tokenContract.methods.set_minter(l2Bridge).simulate({ from: admin });
   await tokenContract.methods.set_minter(l2Bridge).send({
