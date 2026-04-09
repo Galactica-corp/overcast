@@ -21,6 +21,8 @@ Protocol detail: [`docs/overcast_protocol_architecture.md`](docs/overcast_protoc
 
 [`packages/private-stablecoin`](packages/private-stablecoin) holds every Noir crate (token, bridge, libraries such as portal content hash and helpers under `crates/`). The former top-level `packages/token-bridge` workspace is gone; use that package’s [`README.md`](packages/private-stablecoin/README.md) and [`AGENTS.md`](packages/private-stablecoin/AGENTS.md) for compile, test, and layout.
 
+For Aztec fee bootstrapping (bridging + claiming FeeJuice into a PrivateFPC), see the “Fee Juice setup (PrivateFPC)” section in [`packages/private-stablecoin/README.md`](packages/private-stablecoin/README.md).
+
 ---
 
 ## Installation

@@ -45,7 +45,10 @@ async function deploySchnorrAccountWithKeys(
   // `isContractPublished` uses the node's public contract registry; `isContractInitialized`
   // checks the siloed init nullifier. An account can be initialized (deploy tx landed) without
   // the former being set — redeploying would then fail with "Invalid tx: Existing nullifier".
-  if (isContractPublished || isContractInitialized) {
+  if (
+    isContractPublished ||
+    isContractInitialized
+  ) {
     logger.info(
       'Account already exists on the network (skipping deployment transaction).',
     );

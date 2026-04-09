@@ -9,7 +9,9 @@ Aztec **Noir** contract package for the Overcast **private stablecoin prototype*
 
 ## Version alignment (keep in lockstep)
 
-1. **Aztec CLI** / toolchain — e.g. `VERSION=4.1.0-rc.2` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
+This repo follows a “**version triangle**”: keep these three pinned to the **same Aztec release** (otherwise you’ll hit API/ABI mismatches at compile/transpile/test time).
+
+1. **Aztec CLI** / toolchain — e.g. `VERSION=4.2.0-aztecnr-rc.2` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
 2. **`aztec-nr` git tag** in [`Nargo.toml`](./Nargo.toml).
 3. **`@aztec/*` npm** versions in [`package.json`](./package.json).
 
@@ -45,12 +47,40 @@ If you **restart** the local network, delete PXE state: `yarn workspace @galacti
 | `yarn workspace @galactica-net/overcast-private-stablecoin codegen` | Generate `src/artifacts/` |
 | `yarn workspace @galactica-net/overcast-private-stablecoin test`    | Jest E2E + `aztec test`   |
 | `yarn workspace @galactica-net/overcast-private-stablecoin deploy`  | Example deploy script     |
+| `yarn workspace @galactica-net/overcast-private-stablecoin fee-juice:setup::testnet` | Bridge + claim FeeJuice (testnet) |
+| `yarn workspace @galactica-net/overcast-private-stablecoin fee-juice:setup::mainnet` | Bridge + claim FeeJuice (mainnet) |
 
 Shorter aliases: `yarn compile:private-stablecoin`, `yarn test:private-stablecoin` (root `package.json`).
 
 ## Agent / contributor docs
 
 See [`AGENTS.md`](./AGENTS.md) for simulate-before-send, testing split, and store cleanup.
+
+## Fee Juice setup (PrivateFPC)
+
+This package includes a script to set up FeeJuice for paying Aztec fees using a deterministic PrivateFPC from `@wonderland/aztec-fee-payment@4.2.0-aztecnr-rc.2`.
+
+### Environment variables
+
+Configure these in `packages/private-stablecoin/.env` (see `.env.example` for placeholders):
+
+- `PRIVATE_FPC_SALT` (required): deterministic salt used to derive the PrivateFPC address.
+- `L1_PRIVATE_KEY` (required): L1 depositor key used to mint (testnet only) and deposit to the FeeJuice portal.
+- `L1_RPC_URL` (optional): override the L1 RPC URL (otherwise uses `config/<AZTEC_ENV>.json`).
+- `FEE_JUICE_AMOUNT_WEI` (optional): wei amount to bridge. Defaults:
+  - testnet: `1000 ether`
+  - mainnet: `10 ether`
+
+### Run
+
+From the repo root:
+
+```bash
+yarn workspace @galactica-net/overcast-private-stablecoin fee-juice:setup::testnet
+yarn workspace @galactica-net/overcast-private-stablecoin fee-juice:setup::mainnet
+```
+
+The script prints a JSON blob with `secret`, `secretHash`, and `leafIndex` (needed for the L2 claim/mint flow), plus the computed PrivateFPC address.
 
 ## Noir formatting
 
