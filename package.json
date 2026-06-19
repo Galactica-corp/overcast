@@ -13,7 +13,7 @@
     "packages/*"
   ],
   "resolutions": {
-    "@aztec/l1-contracts": "git+https://github.com/AztecProtocol/l1-contracts.git#v4.2.0-aztecnr-rc.2"
+    "@aztec/l1-contracts": "git+https://github.com/AztecProtocol/l1-contracts.git#v4.2.0"
   },
   "scripts": {
     "lint": "yarn lint:eslint && yarn format:check",

@@ -119,6 +119,6 @@ unconstrained fn mint_to_private_failure_invalid_commitments_zero() {
     env.call_public(minter, PrivateStablecoin::at(token_contract_address).mint_to_commitment(0, mint_amount));
 }
 
-// NOTE: This test was removed during upgrade to 4.2.0-aztecnr-rc.2. With domain-separated tags, duplicate
+// NOTE: This test was removed during upgrade to 4.2.0. With domain-separated tags, duplicate
 // completion log detection in TXE no longer catches double-completion. The protocol still prevents
 // this via nullifier mechanisms at the real PXE level.

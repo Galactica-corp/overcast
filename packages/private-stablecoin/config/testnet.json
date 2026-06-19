@@ -10,7 +10,7 @@
   },
   "settings": {
     "skipLocalNetwork": true,
-    "version": "4.2.0-aztecnr-rc.2"
+    "version": "4.2.0"
   },
   "timeouts": {
     "deployTimeout": 1200000,

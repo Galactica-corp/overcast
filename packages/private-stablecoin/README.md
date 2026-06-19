@@ -11,7 +11,7 @@ Aztec **Noir** contract package for the Overcast **private stablecoin prototype*
 
 This repo follows a “**version triangle**”: keep these three pinned to the **same Aztec release** (otherwise you’ll hit API/ABI mismatches at compile/transpile/test time).
 
-1. **Aztec CLI** / toolchain — e.g. `VERSION=4.2.0-aztecnr-rc.2` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
+1. **Aztec CLI** / toolchain — e.g. `VERSION=4.2.0` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
 2. **`aztec-nr` git tag** in [`Nargo.toml`](./Nargo.toml).
 3. **`@aztec/*` npm** versions in [`package.json`](./package.json).
 
@@ -60,7 +60,7 @@ See `[AGENTS.md](./AGENTS.md)` for simulate-before-send, testing split, and stor
 
 ## Fee Juice setup (PrivateFPC)
 
-This package includes a script to set up FeeJuice for paying Aztec fees using a deterministic PrivateFPC from `@wonderland/aztec-fee-payment@4.2.0-aztecnr-rc.2`.
+This package includes a script to set up FeeJuice for paying Aztec fees using a deterministic PrivateFPC from `@wonderland/aztec-fee-payment@4.2.0`.
 
 ### Fee payment selection in scripts
 
