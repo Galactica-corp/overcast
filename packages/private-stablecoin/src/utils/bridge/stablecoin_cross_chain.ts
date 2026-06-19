@@ -1,5 +1,5 @@
 import { EthAddress, AztecAddress } from '@aztec/aztec.js/addresses';
-import type { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
+import type { FeePaymentMethod } from '@aztec/aztec.js/fee';
 import { Fr } from '@aztec/aztec.js/fields';
 import { generateClaimSecret } from '@aztec/aztec.js/ethereum';
 import { waitForL1ToL2MessageReady } from '@aztec/aztec.js/messaging';
@@ -240,7 +240,7 @@ export async function mineTwoL2BlocksForInboxLag(opts: {
   l2Token: AztecAddress;
   tokenPortalL1: `0x${string}`;
   from: AztecAddress;
-  sponsoredPaymentMethod: SponsoredFeePaymentMethod;
+  sponsoredPaymentMethod: FeePaymentMethod;
   txTimeout: number;
 }): Promise<void> {
   const portalEth = EthAddress.fromString(opts.tokenPortalL1);
@@ -268,7 +268,7 @@ export async function advanceLocalChainThenWaitForL1MessageReady(opts: {
   l2Token: AztecAddress;
   tokenPortalL1: `0x${string}`;
   from: AztecAddress;
-  sponsoredPaymentMethod: SponsoredFeePaymentMethod;
+  sponsoredPaymentMethod: FeePaymentMethod;
   txTimeout: number;
   waitTimeoutSeconds: number;
 }): Promise<void> {

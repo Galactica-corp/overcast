@@ -9,18 +9,17 @@ import type { ExtendedViemWalletClient } from '@aztec/ethereum/types';
 import type { Abi } from 'viem';
 import { foundry, sepolia } from 'viem/chains';
 import { padHex } from 'viem';
+import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
 
 import { PrivateStablecoinContract } from '../artifacts/PrivateStablecoin.js';
 import { TokenBridgeContract } from '../artifacts/TokenBridge.js';
 import { getAztecNodeUrl, getL1ChainId, getL1RpcUrl, getTimeouts } from '../../config/config.js';
 import { deploySchnorrAccount } from './deploy_account.js';
-import { getSponsoredFPCInstance } from './sponsored_fpc.js';
-import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
-import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
 import { Fr } from '@aztec/aztec.js/fields';
 import type { EmbeddedWallet } from '@aztec/wallets/embedded';
 import type { AccountManager } from '@aztec/aztec.js/wallet';
 import type { AztecAddress } from '@aztec/aztec.js/addresses';
+import { getFeePaymentMethodForTxFees } from './fpc.js';
 const packageDir = dirname(fileURLToPath(import.meta.url));
 const repoPackagesDir = join(packageDir, '../../..');
 export const STABLECOIN_WRAPPER_ARTIFACTS_DIR = join(repoPackagesDir, 'stablecoin-wrapper/artifacts/contracts');
@@ -35,6 +34,11 @@ export function loadStablecoinWrapperArtifact(relativePath: string): SolidityArt
 
 const DEFAULT_MNEMONIC = 'test test test test test test test test test test test junk';
 
+function normalizePrivateKey(raw: string): `0x${string}` {
+  const trimmed = raw.trim();
+  return (trimmed.startsWith('0x') ? trimmed : `0x${trimmed}`) as `0x${string}`;
+}
+
 export function l1ChainForConfig(): typeof foundry | typeof sepolia {
   const id = getL1ChainId();
   if (id === 11155111) {
@@ -44,17 +48,22 @@ export function l1ChainForConfig(): typeof foundry | typeof sepolia {
 }
 
 /**
- * Extended L1 viem client using repo config (RPC, chain id) and optional `L1_MNEMONIC`.
+ * Extended L1 viem client using repo config (RPC, chain id) and optional `L1_PRIVATE_KEY`.
  */
 export function createL1ClientFromConfig(
   addressIndex?: number,
 ): ExtendedViemWalletClient {
   const l1Rpc = getL1RpcUrl();
   const chain = l1ChainForConfig();
-  const mnemonic = process.env.L1_MNEMONIC ?? DEFAULT_MNEMONIC;
+
+  const privKeyRaw = process.env.L1_PRIVATE_KEY?.trim();
+  const accountOrMnemonic: PrivateKeyAccount | string = privKeyRaw
+    ? privateKeyToAccount(normalizePrivateKey(privKeyRaw))
+    : DEFAULT_MNEMONIC;
+
   return createExtendedL1Client(
     [l1Rpc],
-    mnemonic,
+    accountOrMnemonic,
     chain as Parameters<typeof createExtendedL1Client>[2],
     undefined,
     addressIndex,
@@ -154,9 +163,7 @@ export async function deployL2PrivateStablecoinAndBridge(
   const timeouts = getTimeouts();
   const { wallet, tokenName, tokenSymbol, tokenDecimals, saltToken, saltBridge, portalEth } = opts;
 
-  const sponsoredFPC = await getSponsoredFPCInstance();
-  await wallet.registerContract(sponsoredFPC, SponsoredFPCContractArtifact);
-  const sponsoredPaymentMethod = new SponsoredFeePaymentMethod(sponsoredFPC.address);
+  const { paymentMethod } = await getFeePaymentMethodForTxFees(wallet);
 
   const deployer = await deploySchnorrAccount(wallet);
   const admin = deployer.address;
@@ -171,7 +178,7 @@ export async function deployL2PrivateStablecoinAndBridge(
   await tokenDeploy.simulate({ from: admin });
   const { contract: tokenContract } = await tokenDeploy.send({
     from: admin,
-    fee: { paymentMethod: sponsoredPaymentMethod },
+    fee: { paymentMethod },
     wait: { timeout: timeouts.deployTimeout },
     contractAddressSalt: saltToken,
     universalDeploy: true,
@@ -182,7 +189,7 @@ export async function deployL2PrivateStablecoinAndBridge(
   await bridgeDeploy.simulate({ from: admin });
   const { contract: bridgeContract } = await bridgeDeploy.send({
     from: admin,
-    fee: { paymentMethod: sponsoredPaymentMethod },
+    fee: { paymentMethod },
     wait: { timeout: timeouts.deployTimeout },
     contractAddressSalt: saltBridge,
     universalDeploy: true,
@@ -192,7 +199,7 @@ export async function deployL2PrivateStablecoinAndBridge(
   await tokenContract.methods.set_minter(l2Bridge).simulate({ from: admin });
   await tokenContract.methods.set_minter(l2Bridge).send({
     from: admin,
-    fee: { paymentMethod: sponsoredPaymentMethod },
+    fee: { paymentMethod },
     wait: { timeout: timeouts.deployTimeout },
   });
 

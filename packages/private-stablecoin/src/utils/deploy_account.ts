@@ -1,6 +1,3 @@
-import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
-import { getSponsoredFPCInstance } from './sponsored_fpc.js';
-import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
 import { Fr } from '@aztec/aztec.js/fields';
 import { GrumpkinScalar } from '@aztec/foundation/curves/grumpkin';
 import { type Logger, createLogger } from '@aztec/foundation/log';
@@ -9,6 +6,7 @@ import { AztecAddress } from '@aztec/aztec.js/addresses';
 import { AccountManager } from '@aztec/aztec.js/wallet';
 import { EmbeddedWallet } from '@aztec/wallets/embedded';
 import { getTimeouts } from '../../config/config.js';
+import { getFeePaymentMethodForTxFees, isAztecMainnetEnv } from './fpc.js';
 
 function isEnvValueSet(value: string | undefined): boolean {
   return value !== undefined && value.trim() !== '';
@@ -58,21 +56,32 @@ async function deploySchnorrAccountWithKeys(
 
   const deployMethod = await account.getDeployMethod();
 
-  logger.info('Setting up sponsored fee payment for account deployment...');
-  const sponsoredFPC = await getSponsoredFPCInstance();
-  logger.info(`Sponsored FPC at: ${sponsoredFPC.address}`);
+  if (isAztecMainnetEnv()) {
+    throw new Error(
+      [
+        `Schnorr account at ${account.address.toString()} is not deployed/initialized on this network.`,
+        'Automatic account deployment on mainnet is disabled.',
+        '',
+        'Deploy/register an account first (e.g. using aztec-wallet) and ensure you have a working fee payment setup (deterministic PrivateFPC funded with FeeJuice), then re-run.',
+      ].join('\n'),
+    );
+  }
 
-  await activeWallet.registerContract(sponsoredFPC, SponsoredFPCContractArtifact);
-  const sponsoredPaymentMethod = new SponsoredFeePaymentMethod(sponsoredFPC.address);
+  logger.info('Setting up fee payment for account deployment...');
+  const { fpcAddress, paymentMethod } = await getFeePaymentMethodForTxFees(activeWallet);
+  logger.info(`Using FPC at: ${fpcAddress.toString()}`);
 
-  // Match aztec-starter e2e: account deploy via send only (see their index.test.ts beforeAll).
+  // The embedded wallet requires the `from` address to exist in its local account DB.
+  await activeWallet.registerSender(account.address, 'account-deployer');
+
+  // Ensure PXE knows the account artifact so entrypoint dispatch can resolve selectors during simulation.
+  await registerDeployedAccountWithPxe(activeWallet, account);
+
   await deployMethod.send({
-    from: AztecAddress.ZERO,
-    fee: { paymentMethod: sponsoredPaymentMethod },
+    from: account.address,
+    fee: { paymentMethod },
     wait: { timeout: timeouts.deployTimeout },
   });
-
-  await registerDeployedAccountWithPxe(activeWallet, account);
 
   logger.info('Account deployment transaction completed.');
   return account;

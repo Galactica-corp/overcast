@@ -62,6 +62,13 @@ See `[AGENTS.md](./AGENTS.md)` for simulate-before-send, testing split, and stor
 
 This package includes a script to set up FeeJuice for paying Aztec fees using a deterministic PrivateFPC from `@wonderland/aztec-fee-payment@4.2.0-aztecnr-rc.2`.
 
+### Fee payment selection in scripts
+
+Deployment scripts in this package automatically select the fee payment contract based on `AZTEC_ENV`:
+
+- `AZTEC_ENV=mainnet`: use the deterministic **PrivateFPC** derived from `PRIVATE_FPC_SALT` (no deployment transaction). You must have already deposited/claimed/minted FeeJuice for this FPC (see the setup script below), otherwise deployments will fail when trying to pay fees.
+- `AZTEC_ENV=local-network` / `testnet`: use the deterministic **SponsoredFPC** derived from `SPONSORED_FPC_SALT` (no deployment transaction).
+
 ### Environment variables
 
 Configure these in `packages/private-stablecoin/.env` (see `.env.example` for placeholders):

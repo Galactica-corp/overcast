@@ -1,5 +1,4 @@
 import { createLogger } from '@aztec/foundation/log';
-import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
 import { setupWallet } from '../src/utils/setup_wallet.js';
 import {
     deployTokenBridgeStack,
@@ -12,9 +11,9 @@ import {
 } from '../src/utils/bridge/stablecoin_cross_chain.js';
 import { formatFrontendDeploymentConfig } from '../src/utils/frontend_deployment_config.js';
 import { getTimeouts } from '../config/config.js';
-import { getSponsoredFPCInstance } from '../src/utils/sponsored_fpc.js';
 import { Fr } from '@aztec/aztec.js/fields';
 import { getAddress, parseEther, parseUnits } from 'viem';
+import { getFeePaymentMethodForTxFees } from '../src/utils/fpc.js';
 
 const TEST_TOKEN_MINT_TO_ENV = 'L1_TEST_TOKEN_MINT_TO';
 const TEST_NATIVE_GAS_ETH_ENV = 'L1_TEST_TOKEN_NATIVE_GAS_ETH';
@@ -113,8 +112,7 @@ async function main() {
         `Bridged ${CREATOR_BRIDGE_AMOUNT.toString()} test tokens from ${creatorAddress} for Aztec claim recipient ${BRIDGE_CLAIM_RECIPIENT}.`,
     );
 
-    const sponsoredFPC = await getSponsoredFPCInstance();
-    const sponsoredPaymentMethod = new SponsoredFeePaymentMethod(sponsoredFPC.address);
+    const { paymentMethod } = await getFeePaymentMethodForTxFees(wallet);
     const waitL1ReadySec = Math.max(300, Math.ceil(timeouts.waitTimeout / 1000));
 
     await advanceLocalChainThenWaitForL1MessageReady({
@@ -125,7 +123,7 @@ async function main() {
         l2Token: result.l2Token,
         tokenPortalL1: result.tokenPortal,
         from: result.deployer.address,
-        sponsoredPaymentMethod,
+        sponsoredPaymentMethod: paymentMethod,
         txTimeout: timeouts.txTimeout,
         waitTimeoutSeconds: waitL1ReadySec,
     });

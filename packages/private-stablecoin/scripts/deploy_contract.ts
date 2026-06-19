@@ -2,14 +2,12 @@ import { PrivateStablecoinContract } from '../src/artifacts/PrivateStablecoin.js
 import { TokenBridgeContract } from '../src/artifacts/TokenBridge.js';
 import { EthAddress } from '@aztec/aztec.js/addresses';
 import { type Logger, createLogger } from '@aztec/foundation/log';
-import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
 import { Fr } from '@aztec/aztec.js/fields';
 import { setupWallet } from '../src/utils/setup_wallet.js';
-import { getSponsoredFPCInstance } from '../src/utils/sponsored_fpc.js';
-import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
 import { deploySchnorrAccount } from '../src/utils/deploy_account.js';
 import { getTimeouts } from '../config/config.js';
 import { formatFrontendDeploymentConfig } from '../src/utils/frontend_deployment_config.js';
+import { getFeePaymentMethodForTxFees } from '../src/utils/fpc.js';
 
 function getOptionalEnv(name: string): string | undefined {
     const value = process.env[name]?.trim();
@@ -44,9 +42,7 @@ async function main() {
     const wallet = await setupWallet();
     logger.info('Wallet ready');
 
-    const sponsoredFPC = await getSponsoredFPCInstance();
-    await wallet.registerContract(sponsoredFPC, SponsoredFPCContractArtifact);
-    const sponsoredPaymentMethod = new SponsoredFeePaymentMethod(sponsoredFPC.address);
+    const { paymentMethod } = await getFeePaymentMethodForTxFees(wallet);
 
     const account = await deploySchnorrAccount(wallet);
     const address = account.address;
@@ -71,7 +67,7 @@ async function main() {
     await deployRequest.simulate({ from: address });
     const { contract: token } = await deployRequest.send({
         from: address,
-        fee: { paymentMethod: sponsoredPaymentMethod },
+        fee: { paymentMethod },
         wait: { timeout: timeouts.deployTimeout },
         contractAddressSalt: tokenSalt,
         universalDeploy: true,
@@ -81,7 +77,7 @@ async function main() {
     await token.methods.mint_to_public(address, initialSupply).simulate({ from: address });
     await token.methods.mint_to_public(address, initialSupply).send({
         from: address,
-        fee: { paymentMethod: sponsoredPaymentMethod },
+        fee: { paymentMethod },
         wait: { timeout: timeouts.deployTimeout },
     });
 
@@ -99,7 +95,7 @@ async function main() {
     await bridgeDeploy.simulate({ from: address });
     const { contract: bridge } = await bridgeDeploy.send({
         from: address,
-        fee: { paymentMethod: sponsoredPaymentMethod },
+        fee: { paymentMethod },
         wait: { timeout: timeouts.deployTimeout },
         contractAddressSalt: bridgeSalt,
         universalDeploy: true,
@@ -108,7 +104,7 @@ async function main() {
     await token.methods.set_minter(bridge.address).simulate({ from: address });
     await token.methods.set_minter(bridge.address).send({
         from: address,
-        fee: { paymentMethod: sponsoredPaymentMethod },
+        fee: { paymentMethod },
         wait: { timeout: timeouts.deployTimeout },
     });
 
