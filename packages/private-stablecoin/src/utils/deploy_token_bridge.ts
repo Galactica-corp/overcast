@@ -1,10 +1,10 @@
-import { AztecAddress, EthAddress } from '@aztec/aztec.js/addresses';
-import { Fr } from '@aztec/aztec.js/fields';
-import type { ExtendedViemWalletClient } from '@aztec/ethereum/types';
-import type { AztecNode } from '@aztec/aztec.js/node';
+import { AztecAddress, EthAddress } from '@aztec-labs/aztec.js/addresses';
+import { Fr } from '@aztec-labs/aztec.js/fields';
+import type { ExtendedViemWalletClient } from '@aztec-labs/ethereum/types';
+import type { AztecNode } from '@aztec-labs/aztec.js/node';
 
-import type { EmbeddedWallet } from '@aztec/wallets/embedded';
-import type { AccountManager } from '@aztec/aztec.js/wallet';
+import type { EmbeddedWallet } from '@aztec-labs/wallets/embedded';
+import type { AccountManager } from '@aztec-labs/aztec.js/wallet';
 
 import {
     createAztecNodeFromConfig,

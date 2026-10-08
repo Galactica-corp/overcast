@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {Epoch} from "@aztec/core/libraries/TimeLib.sol";
+import {Epoch} from "./aztec/TimeLib.sol";
 
 import {TokenPortal} from "./TokenPortal.sol";
 
@@ -66,6 +66,7 @@ contract StablecoinWrapper is Initializable {
     uint256 amount,
     address callerOnL1,
     Epoch epoch,
+    uint256 numCheckpointsInEpoch,
     uint256 leafIndex,
     bytes32[] calldata path
   ) external {
@@ -77,7 +78,7 @@ contract StablecoinWrapper is Initializable {
       "withdraw: insufficient collateral"
     );
 
-    tokenPortal.withdraw(recipient, amount, callerOnL1, epoch, leafIndex, path);
+    tokenPortal.withdraw(recipient, amount, callerOnL1, epoch, numCheckpointsInEpoch, leafIndex, path);
     underlyingToken.safeTransfer(recipient, amount);
 
     emit WithdrawnFromL2(recipient, amount, callerOnL1);

@@ -1,9 +1,9 @@
-import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
-import { AztecAddress } from '@aztec/aztec.js/addresses';
-import { Fr } from '@aztec/aztec.js/fields';
-import type { Wallet } from '@aztec/aztec.js/wallet';
-import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
-import { FPCFeePaymentMethod, registerPrivateContract } from '@wonderland/aztec-fee-payment';
+import { SponsoredFeePaymentMethod } from '@aztec-labs/aztec.js/fee';
+import { AztecAddress } from '@aztec-labs/aztec.js/addresses';
+import { Fr } from '@aztec-labs/aztec.js/fields';
+import type { Wallet } from '@aztec-labs/aztec.js/wallet';
+import { SponsoredFPCContractArtifact } from '@aztec-labs/noir-contracts.js/SponsoredFPC';
+import type { FPCFeePaymentMethod } from '@wonderland/aztec-fee-payment';
 import { getEnv } from '../../config/config.js';
 import { getSponsoredFPCInstance } from './sponsored_fpc.js';
 
@@ -22,6 +22,7 @@ export function isAztecMainnetEnv(): boolean {
 export async function getFpcAddressForFees(wallet: Wallet): Promise<AztecAddress> {
     if (isAztecMainnetEnv()) {
         const salt = Fr.fromString(requiredEnv('PRIVATE_FPC_SALT'));
+        const { registerPrivateContract } = await import('@wonderland/aztec-fee-payment');
         const fpc = await registerPrivateContract(wallet, salt);
         return fpc.address;
     }
@@ -37,6 +38,7 @@ export async function getFeePaymentMethodForTxFees(
 }> {
     if (isAztecMainnetEnv()) {
         const fpcAddress = await getFpcAddressForFees(wallet);
+        const { FPCFeePaymentMethod } = await import('@wonderland/aztec-fee-payment');
         return {
             fpcAddress,
             paymentMethod: new FPCFeePaymentMethod(fpcAddress),

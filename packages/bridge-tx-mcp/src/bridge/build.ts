@@ -110,12 +110,20 @@ export interface WithdrawBuildResult {
 export function buildWithdrawTransaction(input: WithdrawBuildInput): WithdrawBuildResult {
   void input.userAztecAddress;
   const amountWei = parseDecimalToBaseUnits(input.amountDecimal, input.tokenDecimals);
-  const { epoch, leafIndex, path } = parseMembershipWitnessJson(input.witnessJson);
+  const { epoch, numCheckpointsInEpoch, leafIndex, path } = parseMembershipWitnessJson(input.witnessJson);
 
   const withdrawData = encodeFunctionData({
     abi: stablecoinWrapperAbi,
     functionName: 'withdrawFromL2ToL1',
-    args: [input.userEvmAddress, amountWei, input.callerOnL1, epoch, leafIndex, [...path]],
+    args: [
+      input.userEvmAddress,
+      amountWei,
+      input.callerOnL1,
+      epoch,
+      numCheckpointsInEpoch,
+      leafIndex,
+      [...path],
+    ],
   });
 
   const props: MarkdownTxPermitProps = {

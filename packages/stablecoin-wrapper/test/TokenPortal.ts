@@ -76,6 +76,7 @@ describe("TokenPortal", async function () {
     const recipientAddr = recipient.account.address;
     const callerOnL1 = other.account.address;
     const l2BlockNumber = 7n;
+    const numCheckpointsInEpoch = 1n;
     const leafIndex = 3n;
     const path: `0x${string}`[] = [];
 
@@ -88,6 +89,7 @@ describe("TokenPortal", async function () {
         amount,
         callerOnL1,
         l2BlockNumber,
+        numCheckpointsInEpoch,
         leafIndex,
         path,
       ]),
@@ -95,7 +97,7 @@ describe("TokenPortal", async function () {
     );
 
     await portal.write.withdraw(
-      [recipientAddr, amount, callerOnL1, l2BlockNumber, leafIndex, path],
+      [recipientAddr, amount, callerOnL1, l2BlockNumber, numCheckpointsInEpoch, leafIndex, path],
       { account: other.account },
     );
 
@@ -118,11 +120,12 @@ describe("TokenPortal", async function () {
     const recipientAddr = recipient.account.address;
     const callerOnL1 = "0x0000000000000000000000000000000000000000" as const;
     const l2BlockNumber = 1n;
+    const numCheckpointsInEpoch = 1n;
     const leafIndex = 0n;
     const path: `0x${string}`[] = [];
 
     await portal.write.withdraw(
-      [recipientAddr, amount, callerOnL1, l2BlockNumber, leafIndex, path],
+      [recipientAddr, amount, callerOnL1, l2BlockNumber, numCheckpointsInEpoch, leafIndex, path],
       { account: user.account },
     );
 

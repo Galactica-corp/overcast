@@ -9,6 +9,8 @@ dotenv.config({ path: path.resolve(packageRoot, '.env') });
 
 export interface NetworkConfig {
   nodeUrl: string;
+  /** Sponsored FPC address for this network. Matches `SPONSORED_FPC_SALT` on 6.0.0-rc.1. */
+  sponsoredFpc?: string;
   l1RpcUrl: string;
   l1ChainId: number;
   /** Aztec L2 rollup version (see https://docs.aztec.network/networks). */

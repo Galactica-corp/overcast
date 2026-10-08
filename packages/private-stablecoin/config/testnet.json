@@ -2,7 +2,8 @@
   "name": "testnet",
   "environment": "testnet",
   "network": {
-    "nodeUrl": "https://rpc.testnet.aztec-labs.com",
+    "nodeUrl": "https://lb.drpc.live/aztec-testnet/Ak_eT5HA2kbyqamqGTF702daoH37vEsR8YYxjmVXwXgc",
+    "sponsoredFpc": "0x06a9fa0208c78509921b0487a6b5cd5c2e93baf17de1a18d310f65a3cc1d924b",
     "l1RpcUrl": "https://ethereum-sepolia-rpc.publicnode.com",
     "l1ChainId": 11155111,
     "rollupVersion": 4127419662,
@@ -10,7 +11,7 @@
   },
   "settings": {
     "skipLocalNetwork": true,
-    "version": "4.2.0"
+    "version": "6.0.0-rc.1"
   },
   "timeouts": {
     "deployTimeout": 1200000,

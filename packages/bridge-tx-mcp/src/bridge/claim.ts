@@ -1,5 +1,5 @@
-import { Fr } from '@aztec/foundation/curves/bn254';
-import { computeSecretHash } from '@aztec/stdlib/hash';
+import { Fr } from '@aztec-labs/foundation/curves/bn254';
+import { computeSecretHash } from '@aztec-labs/stdlib/hash';
 
 export interface L1ToL2PrivateClaimJson {
   /** Base units as decimal string */
@@ -19,7 +19,7 @@ export interface L1ToL2PrivateClaimJson {
 }
 
 /**
- * Same derivation as `generateClaimSecret` in `@aztec/aztec.js` (Fr.random + `computeSecretHash`).
+ * Same derivation as `generateClaimSecret` in `@aztec-labs/aztec.js` (Fr.random + `computeSecretHash`).
  */
 export async function generateDepositClaimPair(): Promise<{ claimSecret: Fr; secretHash: Fr }> {
   const claimSecret = Fr.random();

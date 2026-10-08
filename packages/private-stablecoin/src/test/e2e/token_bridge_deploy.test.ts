@@ -8,10 +8,10 @@ import { PrivateStablecoinContract } from '../../artifacts/PrivateStablecoin.js'
 import { setupWallet } from '../../utils/setup_wallet.js';
 import { deployTokenBridgeStack } from '../../utils/deploy_token_bridge.js';
 import { getSponsoredFPCInstance } from '../../utils/sponsored_fpc.js';
-import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
-import { createLogger } from '@aztec/foundation/log';
-import { EthAddress } from '@aztec/aztec.js/addresses';
-import { Fr } from '@aztec/aztec.js/fields';
+import { SponsoredFPCContractArtifact } from '@aztec-labs/noir-contracts.js/SponsoredFPC';
+import { createLogger } from '@aztec-labs/foundation/log';
+import { EthAddress } from '@aztec-labs/aztec.js/addresses';
+import { Fr } from '@aztec-labs/aztec.js/fields';
 
 const runBridge = process.env.RUN_AZTEC_E2E === '1';
 

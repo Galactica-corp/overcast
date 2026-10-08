@@ -1,6 +1,6 @@
-import { createAztecNodeClient } from '@aztec/aztec.js/node';
+import { createAztecNodeClient } from '@aztec-labs/aztec.js/node';
 import { getAztecNodeUrl } from '../../config/config.js';
-import { EmbeddedWallet } from '@aztec/wallets/embedded';
+import { EmbeddedWallet } from '@aztec-labs/wallets/embedded';
 
 export async function setupWallet(): Promise<EmbeddedWallet> {
   const nodeUrl = getAztecNodeUrl();

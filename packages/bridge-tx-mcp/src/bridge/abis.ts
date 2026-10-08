@@ -37,6 +37,7 @@ export const stablecoinWrapperAbi = [
       { name: 'amount', type: 'uint256' },
       { name: 'callerOnL1', type: 'address' },
       { name: 'epoch', type: 'uint256' },
+      { name: 'numCheckpointsInEpoch', type: 'uint256' },
       { name: 'leafIndex', type: 'uint256' },
       { name: 'path', type: 'bytes32[]' },
     ],

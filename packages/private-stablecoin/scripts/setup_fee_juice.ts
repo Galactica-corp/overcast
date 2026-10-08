@@ -1,18 +1,17 @@
-import { createLogger } from '@aztec/foundation/log';
-import { createAztecNodeClient } from '@aztec/aztec.js/node';
-import { Fr } from '@aztec/aztec.js/fields';
-import { AztecAddress } from '@aztec/aztec.js/addresses';
-import { generateClaimSecret } from '@aztec/aztec.js/ethereum';
-import { FeeJuicePortalAbi } from '@aztec/l1-artifacts';
-import { createExtendedL1Client } from '@aztec/ethereum/client';
-import { extractEvent } from '@aztec/ethereum/utils';
-import { waitForL1ToL2MessageReady } from '@aztec/aztec.js/messaging';
+import { createLogger } from '@aztec-labs/foundation/log';
+import { createAztecNodeClient } from '@aztec-labs/aztec.js/node';
+import { Fr } from '@aztec-labs/aztec.js/fields';
+import { generateClaimSecret } from '@aztec-labs/aztec.js/ethereum';
+import { FeeJuicePortalAbi } from '@aztec-foundation/l1-artifacts';
+import { createExtendedL1Client } from '@aztec-labs/ethereum/client';
+import { extractEvent } from '@aztec-labs/ethereum/utils';
+import { waitForL1ToL2MessageReady } from '@aztec-labs/aztec.js/messaging';
 import type { Abi } from 'viem';
 import { parseEther, getAddress } from 'viem';
 import { foundry, mainnet, sepolia } from 'viem/chains';
 
 import { registerPrivateContract } from '@wonderland/aztec-fee-payment';
-import { FeeJuiceContract } from '@aztec/noir-contracts.js/FeeJuice';
+import { FeeJuiceContract } from '@aztec-labs/aztec.js/protocol';
 
 import { setupWallet } from '../src/utils/setup_wallet.js';
 import { getAztecNodeUrl, getL1ChainId, getL1RpcUrl, getTimeouts } from '../config/config.js';
@@ -133,29 +132,6 @@ function getFeeJuicePortalAddressFromNodeInfo(nodeInfo: any): `0x${string}` {
     }
     throw new Error(
         `Could not determine FeeJuicePortal address from node_getNodeInfo().l1ContractAddresses; got keys: ${Object.keys(l1 ?? {}).join(', ')}`,
-    );
-}
-
-function getFeeJuiceL2AddressFromNodeInfo(nodeInfo: any): AztecAddress {
-    const l2 = nodeInfo?.l2ContractAddresses;
-    const candidates = [
-        l2?.feeJuiceAddress,
-        l2?.feeJuiceContractAddress,
-        l2?.feeJuice,
-    ];
-    for (const c of candidates) {
-        if (typeof c === 'string' && c.startsWith('0x')) {
-            return AztecAddress.fromString(c);
-        }
-        if (c && typeof c.toString === 'function') {
-            const s = c.toString();
-            if (typeof s === 'string' && s.startsWith('0x')) {
-                return AztecAddress.fromString(s);
-            }
-        }
-    }
-    throw new Error(
-        `Could not determine FeeJuice L2 address from node_getNodeInfo().l2ContractAddresses; got keys: ${Object.keys(l2 ?? {}).join(', ')}`,
     );
 }
 
@@ -338,8 +314,7 @@ async function main() {
     logger.info(`Waiting for L1→L2 message ready (timeout=${waitL1ReadySec}s)...`);
     await waitForL1ToL2MessageReady(node, messageHash, { timeoutSeconds: waitL1ReadySec });
 
-    const feeJuiceL2 = getFeeJuiceL2AddressFromNodeInfo(nodeInfo);
-    const feeJuice = await FeeJuiceContract.at(feeJuiceL2, wallet);
+    const feeJuice = FeeJuiceContract.withWallet(wallet);
 
     await feeJuice.methods.claim(fpc.address, amount, secret, leafIndex).send({
         from: claimerAddress,

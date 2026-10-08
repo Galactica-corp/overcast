@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.28;
 
-import {DataStructures} from "@aztec/core/libraries/DataStructures.sol";
-import {Epoch} from "@aztec/core/libraries/TimeLib.sol";
-import {IInbox} from "@aztec/core/interfaces/messagebridge/IInbox.sol";
-import {IOutbox} from "@aztec/core/interfaces/messagebridge/IOutbox.sol";
-import {IHaveVersion} from "@aztec/governance/interfaces/IRegistry.sol";
+import {DataStructures} from "../aztec/DataStructures.sol";
+import {Epoch} from "../aztec/TimeLib.sol";
+import {IInbox} from "../aztec/IInbox.sol";
+import {IOutbox} from "../aztec/IOutbox.sol";
+import {IHaveVersion} from "../aztec/IRegistry.sol";
 
 /// @dev Minimal rollup for tests: `TokenPortal` calls `getInbox`, `getOutbox`, and `getVersion` on `IRollup`.
 contract MockAztecRollup {
@@ -72,36 +72,6 @@ contract MockAztecInbox is IInbox {
     uint256 index = nextIndex++;
     return (bytes32(0), index);
   }
-
-  function consume(uint256) external pure returns (bytes32) {
-    return bytes32(0);
-  }
-
-  function catchUp(uint256) external {}
-
-  function getFeeAssetPortal() external pure returns (address) {
-    return address(0);
-  }
-
-  function getRoot(uint256) external pure returns (bytes32) {
-    return bytes32(0);
-  }
-
-  function getState() external view returns (IInbox.InboxState memory) {
-    return IInbox.InboxState({
-      rollingHash: bytes16(0),
-      totalMessagesInserted: uint64(nextIndex - 1),
-      inProgress: 0
-    });
-  }
-
-  function getTotalMessagesInserted() external view returns (uint64) {
-    return uint64(nextIndex - 1);
-  }
-
-  function getInProgress() external pure returns (uint64) {
-    return 0;
-  }
 }
 
 contract MockAztecOutbox is IOutbox {
@@ -121,6 +91,7 @@ contract MockAztecOutbox is IOutbox {
   function consume(
     DataStructures.L2ToL1Msg calldata _message,
     Epoch _epoch,
+    uint256 /* _numCheckpointsInEpoch */,
     uint256 _leafIndex,
     bytes32[] calldata /* _path */
   ) external {
@@ -137,15 +108,5 @@ contract MockAztecOutbox is IOutbox {
     lastL2BlockNumber = Epoch.unwrap(_epoch);
     lastLeafIndex = _leafIndex;
     emit Consumed(_message, lastL2BlockNumber, _leafIndex);
-  }
-
-  function insert(Epoch, bytes32) external {}
-
-  function hasMessageBeenConsumedAtEpoch(Epoch, uint256) external pure returns (bool) {
-    return false;
-  }
-
-  function getRootData(Epoch) external pure returns (bytes32) {
-    return bytes32(0);
   }
 }

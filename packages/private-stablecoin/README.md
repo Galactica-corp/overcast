@@ -11,9 +11,9 @@ Aztec **Noir** contract package for the Overcast **private stablecoin prototype*
 
 This repo follows a “**version triangle**”: keep these three pinned to the **same Aztec release** (otherwise you’ll hit API/ABI mismatches at compile/transpile/test time).
 
-1. **Aztec CLI** / toolchain — e.g. `VERSION=4.2.0` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
-2. **`aztec-nr` git tag** in [`Nargo.toml`](./Nargo.toml).
-3. **`@aztec/*` npm** versions in [`package.json`](./package.json).
+1. **Aztec CLI** / toolchain — `VERSION=6.0.0-rc.1` from the [Aztec install script](https://github.com/AztecProtocol/aztec-starter#-getting-started) in aztec-starter’s README.
+2. **`aztec-nr` git tag** in each crate `Nargo.toml` (`https://github.com/aztec-labs-eng/aztec-nr`, tag `v6.0.0-rc.1`).
+3. **`@aztec-labs/*` npm** versions in [`package.json`](./package.json). Foundation packages (`l1-artifacts`, `bb.js`) use `@aztec-foundation`.
 
 Bump all three together when upgrading.
 
@@ -27,7 +27,7 @@ yarn install
 
 ## Prerequisites
 
-- **Node.js 22.x** (aztec-starter documents **22.15.0**).
+- **Node.js 24.x** (Aztec 6 requires **24.12.0** or newer).
 - **Aztec CLI** matching the version triangle above.
 - Local development: run **`aztec start --local-network`**, then from the repo root:
 
@@ -60,14 +60,14 @@ See `[AGENTS.md](./AGENTS.md)` for simulate-before-send, testing split, and stor
 
 ## Fee Juice setup (PrivateFPC)
 
-This package includes a script to set up FeeJuice for paying Aztec fees using a deterministic PrivateFPC from `@wonderland/aztec-fee-payment@4.2.0`.
+This package includes a script to set up FeeJuice for paying Aztec fees using a deterministic PrivateFPC from `@wonderland/aztec-fee-payment`. There is no 6.0.0-rc.1 release of that package. The published 4.2.0 build imports gas constants that `@aztec-labs/stdlib` no longer exports, so mainnet PrivateFPC registration does not load on this version. Local and testnet fee payment uses the sponsored FPC and does not import that package.
 
 ### Fee payment selection in scripts
 
 Deployment scripts in this package automatically select the fee payment contract based on `AZTEC_ENV`:
 
 - `AZTEC_ENV=mainnet`: use the deterministic **PrivateFPC** derived from `PRIVATE_FPC_SALT` (no deployment transaction). You must have already deposited/claimed/minted FeeJuice for this FPC (see the setup script below), otherwise deployments will fail when trying to pay fees.
-- `AZTEC_ENV=local-network` / `testnet`: use the deterministic **SponsoredFPC** derived from `SPONSORED_FPC_SALT` (no deployment transaction).
+- `AZTEC_ENV=testnet` and `AZTEC_ENV=local-network`: pay fees with the SponsoredFPC derived from `SPONSORED_FPC_SALT` (no deployment transaction). On 6.0.0-rc.1 that address is `0x06a9fa0208c78509921b0487a6b5cd5c2e93baf17de1a18d310f65a3cc1d924b`, also recorded as `network.sponsoredFpc` in [`config/testnet.json`](./config/testnet.json).
 
 ### Environment variables
 

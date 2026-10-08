@@ -1,15 +1,15 @@
-import { Fr } from '@aztec/aztec.js/fields';
+import { Fr } from '@aztec-labs/aztec.js/fields';
 import {
   getContractInstanceFromInstantiationParams,
   type ContractInstanceWithAddress,
-} from '@aztec/aztec.js/contracts';
-import type { Wallet } from '@aztec/aztec.js/wallet';
-import type { LogFn } from '@aztec/foundation/log';
+} from '@aztec-labs/aztec.js/contracts';
+import type { Wallet } from '@aztec-labs/aztec.js/wallet';
+import type { LogFn } from '@aztec-labs/foundation/log';
 import {
   SponsoredFPCContract,
   SponsoredFPCContractArtifact,
-} from '@aztec/noir-contracts.js/SponsoredFPC';
-import { SPONSORED_FPC_SALT } from '@aztec/constants';
+} from '@aztec-labs/noir-contracts.js/SponsoredFPC';
+import { SPONSORED_FPC_SALT } from '@aztec-labs/constants';
 
 export async function getSponsoredFPCInstance(): Promise<ContractInstanceWithAddress> {
   return await getContractInstanceFromInstantiationParams(SponsoredFPCContractArtifact, {
@@ -23,12 +23,13 @@ export async function getSponsoredFPCAddress() {
 
 export async function setupSponsoredFPC(deployer: Wallet, log: LogFn) {
   const [{ item: from }] = await deployer.getAccounts();
-  const deployRequest = SponsoredFPCContract.deploy(deployer);
+  const deployRequest = SponsoredFPCContract.deploy(deployer, {
+    salt: new Fr(SPONSORED_FPC_SALT),
+    universalDeploy: true,
+  });
   await deployRequest.simulate({ from });
   const deployed = await deployRequest.send({
     from,
-    contractAddressSalt: new Fr(SPONSORED_FPC_SALT),
-    universalDeploy: true,
   });
 
   log(`SponsoredFPC: ${deployed.contract.address}`);

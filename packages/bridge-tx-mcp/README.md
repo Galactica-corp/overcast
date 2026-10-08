@@ -6,7 +6,7 @@ Small [Model Context Protocol](https://modelcontextprotocol.io/) server that bui
 
 - **No RPC**: gas limits are **fixed, generous** offline defaults (not `estimateGas`). You can replace them later with live estimation when an RPC URL is wired in.
 - **Deposit** (`deposit` tool): builds `MarkdownComponentRawTransactionWithPermit` for the bridge call, optional approval-style markdown (same shape as the reference flow’s “permit” mapping), and **claim data** (`claimSecret`, `claimAmount`). `messageHash` / `messageLeafIndex` are **not** available without an L1 receipt — they are omitted until the deposit transaction is mined and `DepositToAztec` can be read.
-- **Withdrawal** (`withdrawal` tool): parses a JSON string shaped like `L2ToL1MembershipWitness` (`epochNumber`, `leafIndex`, `siblingPath`, optional `root`) and encodes `withdrawFromL2ToL1`. The L1 **recipient** is the **user EVM address** input; **caller on L1** must match what was used in `exit_to_l1_private` on L2 (typically the wrapper address).
+- **Withdrawal** (`withdrawal` tool): parses a JSON string shaped like `L2ToL1MembershipWitness` (`epochNumber`, `numCheckpointsInEpoch`, `leafIndex`, `siblingPath`, optional `root`) and encodes `withdrawFromL2ToL1`. The L1 **recipient** is the **user EVM address** input; **caller on L1** must match what was used in `exit_to_l1_private` on L2 (typically the wrapper address).
 
 ## Setup
 
@@ -79,5 +79,5 @@ Withdrawal only:
 
 | Field        | Description                                                                                  |
 | ------------ | -------------------------------------------------------------------------------------------- |
-| `witness`    | JSON string: `L2ToL1MembershipWitness`-shaped (`epochNumber`, `leafIndex`, `siblingPath`, …) |
+| `witness`    | JSON string: `L2ToL1MembershipWitness`-shaped (`epochNumber`, `numCheckpointsInEpoch`, `leafIndex`, `siblingPath`, …) |
 | `callerOnL1` | L1 `caller_on_l1` from `exit_to_l1_private`                                                  |

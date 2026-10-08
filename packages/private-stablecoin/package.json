@@ -20,24 +20,29 @@
     "test::testnet": "AZTEC_ENV=testnet yarn test:js",
     "test:js": "rm -rf store/pxe && NODE_NO_WARNINGS=1 NODE_OPTIONS='--experimental-vm-modules' yarn exec jest --no-cache --runInBand --config jest.integration.config.json",
     "test:js:e2e": "RUN_AZTEC_E2E=1 yarn test:js",
-    "test:nr": "aztec test"
+    "test:nr": "cd ../.. && aztec test"
   },
   "dependencies": {
-    "@aztec/accounts": "4.2.0",
-    "@aztec/aztec.js": "4.2.0",
-    "@aztec/constants": "4.2.0",
-    "@aztec/entrypoints": "4.2.0",
-    "@aztec/ethereum": "4.2.0",
-    "@aztec/foundation": "4.2.0",
-    "@aztec/noir-contracts.js": "4.2.0",
-    "@aztec/protocol-contracts": "4.2.0",
-    "@aztec/pxe": "4.2.0",
-    "@aztec/stdlib": "4.2.0",
-    "@aztec/wallet-sdk": "4.2.0",
-    "@aztec/wallets": "4.2.0",
+    "@aztec-foundation/l1-artifacts": "6.0.0-rc.1",
+    "@aztec-labs/accounts": "6.0.0-rc.1",
+    "@aztec-labs/aztec.js": "6.0.0-rc.1",
+    "@aztec-labs/constants": "6.0.0-rc.1",
+    "@aztec-labs/entrypoints": "6.0.0-rc.1",
+    "@aztec-labs/ethereum": "6.0.0-rc.1",
+    "@aztec-labs/foundation": "6.0.0-rc.1",
+    "@aztec-labs/noir-contracts.js": "6.0.0-rc.1",
+    "@aztec-labs/protocol-contracts": "6.0.0-rc.1",
+    "@aztec-labs/pxe": "6.0.0-rc.1",
+    "@aztec-labs/stdlib": "6.0.0-rc.1",
+    "@aztec-labs/wallet-sdk": "6.0.0-rc.1",
+    "@aztec-labs/wallets": "6.0.0-rc.1",
+    "@aztec/aztec.js": "npm:@aztec-labs/aztec.js@6.0.0-rc.1",
+    "@aztec/constants": "npm:@aztec-labs/constants@6.0.0-rc.1",
+    "@aztec/protocol-contracts": "npm:@aztec-labs/protocol-contracts@6.0.0-rc.1",
+    "@aztec/stdlib": "npm:@aztec-labs/stdlib@6.0.0-rc.1",
     "@wonderland/aztec-fee-payment": "4.2.0",
     "dotenv": "^17.2.2",
-    "viem": "^2.43.0"
+    "viem": "npm:@aztec/viem@2.38.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
@@ -54,9 +59,9 @@
     "testTimeout": 200000
   },
   "config": {
-    "aztecVersion": "4.2.0"
+    "aztecVersion": "6.0.0-rc.1"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   }
 }
