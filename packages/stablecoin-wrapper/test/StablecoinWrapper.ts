@@ -65,11 +65,12 @@ describe("StablecoinWrapper", async function () {
     const recipientAddr = recipient.account.address;
     const callerOnL1 = getAddress(wrapper.address);
     const l2BlockNumber = 7n;
+    const numCheckpointsInEpoch = 1n;
     const leafIndex = 2n;
     const path: `0x${string}`[] = [];
 
     await wrapper.write.withdrawFromL2ToL1(
-      [recipientAddr, amount, callerOnL1, l2BlockNumber, leafIndex, path],
+      [recipientAddr, amount, callerOnL1, l2BlockNumber, numCheckpointsInEpoch, leafIndex, path],
       { account: depositor.account },
     );
 

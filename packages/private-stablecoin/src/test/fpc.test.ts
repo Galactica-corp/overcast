@@ -1,4 +1,4 @@
-import { AztecAddress } from '@aztec/aztec.js/addresses';
+import { AztecAddress } from '@aztec-labs/aztec.js/addresses';
 import { jest } from '@jest/globals';
 
 describe('FPC utility (env selection)', () => {
@@ -25,7 +25,7 @@ describe('FPC utility (env selection)', () => {
         process.env.PRIVATE_FPC_SALT =
             '0x0000000000000000000000000000000000000000000000000000000000000042';
 
-        const fpcAddress = AztecAddress.fromString(
+        const fpcAddress = AztecAddress.fromStringUnsafe(
             '0x1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f',
         );
 

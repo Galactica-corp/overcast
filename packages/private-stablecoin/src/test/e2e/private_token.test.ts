@@ -1,14 +1,14 @@
 import { PrivateStablecoinContract } from '../../artifacts/PrivateStablecoin.js';
-import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
+import { SponsoredFeePaymentMethod } from '@aztec-labs/aztec.js/fee';
 import { deploySchnorrAccount } from '../../utils/deploy_account.js';
 import { getSponsoredFPCInstance } from '../../utils/sponsored_fpc.js';
 import { setupWallet } from '../../utils/setup_wallet.js';
-import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
+import { SponsoredFPCContractArtifact } from '@aztec-labs/noir-contracts.js/SponsoredFPC';
 import { getTimeouts } from '../../../config/config.js';
-import { type Logger, createLogger } from '@aztec/foundation/log';
-import { type ContractInstanceWithAddress } from '@aztec/aztec.js/contracts';
-import { EmbeddedWallet } from '@aztec/wallets/embedded';
-import { AccountManager } from '@aztec/aztec.js/wallet';
+import { type Logger, createLogger } from '@aztec-labs/foundation/log';
+import { type ContractInstanceWithAddress } from '@aztec-labs/aztec.js/contracts';
+import { EmbeddedWallet } from '@aztec-labs/wallets/embedded';
+import { AccountManager } from '@aztec-labs/aztec.js/wallet';
 
 const runAztecE2E = process.env.RUN_AZTEC_E2E === '1';
 

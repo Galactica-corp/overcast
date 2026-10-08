@@ -1,4 +1,4 @@
-import { createLogger } from '@aztec/foundation/log';
+import { createLogger } from '@aztec-labs/foundation/log';
 import { setupWallet } from '../src/utils/setup_wallet.js';
 import {
     deployTokenBridgeStack,
@@ -11,7 +11,7 @@ import {
 } from '../src/utils/bridge/stablecoin_cross_chain.js';
 import { formatFrontendDeploymentConfig } from '../src/utils/frontend_deployment_config.js';
 import { getTimeouts } from '../config/config.js';
-import { Fr } from '@aztec/aztec.js/fields';
+import { Fr } from '@aztec-labs/aztec.js/fields';
 import { getAddress, parseEther, parseUnits } from 'viem';
 import { getFeePaymentMethodForTxFees } from '../src/utils/fpc.js';
 

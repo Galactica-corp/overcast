@@ -3,19 +3,19 @@ pragma solidity ^0.8.28;
 
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-import {IInbox} from "@aztec/core/interfaces/messagebridge/IInbox.sol";
-import {IOutbox} from "@aztec/core/interfaces/messagebridge/IOutbox.sol";
-import {DataStructures} from "@aztec/core/libraries/DataStructures.sol";
-import {IRegistry} from "@aztec/governance/interfaces/IRegistry.sol";
-import {IRollup} from "@aztec/core/interfaces/IRollup.sol";
+import {IInbox} from "./aztec/IInbox.sol";
+import {IOutbox} from "./aztec/IOutbox.sol";
+import {DataStructures} from "./aztec/DataStructures.sol";
+import {IRegistry} from "./aztec/IRegistry.sol";
+import {IRollup} from "./aztec/IRollup.sol";
 import {TokenPortalContentHash} from "./libraries/TokenPortalContentHash.sol";
-import {Epoch} from "@aztec/core/libraries/TimeLib.sol";
+import {Epoch} from "./aztec/TimeLib.sol";
 
 /// @title TokenPortal
 /// @notice Aztec L1 portal: sends L1→L2 bridge messages and consumes L2→L1 withdrawals. Does not hold or move
 ///         ERC20; custody stays in `StablecoinWrapper` which calls this contract.
-/// @dev Uses `@aztec/l1-contracts` types (`DataStructures`, `Hash` via `TokenPortalContentHash`). Rollup wiring
-///      matches published interfaces (`getRollup`, `INBOX`, `OUTBOX`, `getVersionFor`).
+/// @dev Message structs and `IInbox` / `IOutbox` / `IRegistry` / `IRollup` live under `contracts/aztec` and match
+///      the v6.0.0-rc.1 surfaces this portal calls (`sendL2Message`, `consume`, `getCanonicalRollup`).
 contract TokenPortal is Initializable {
   bytes32 public l2Bridge;
   IRegistry public registry;
@@ -91,6 +91,7 @@ contract TokenPortal is Initializable {
     uint256 amount,
     address callerOnL1,
     Epoch epoch,
+    uint256 numCheckpointsInEpoch,
     uint256 leafIndex,
     bytes32[] calldata path
   ) external {
@@ -113,7 +114,7 @@ contract TokenPortal is Initializable {
       content: content
     });
 
-    outbox.consume(message, epoch, leafIndex, path);
+    outbox.consume(message, epoch, numCheckpointsInEpoch, leafIndex, path);
 
     emit WithdrawalMessageConsumed(recipient, amount, callerOnL1);
   }

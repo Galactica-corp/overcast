@@ -30,7 +30,9 @@ const withdrawParameters = baseInputs.extend({
   witness: z
     .string()
     .min(1)
-    .describe('JSON string of L2ToL1MembershipWitness (root, leafIndex, siblingPath, epochNumber)'),
+    .describe(
+      'JSON string of L2ToL1MembershipWitness (root, leafIndex, siblingPath, epochNumber, numCheckpointsInEpoch)',
+    ),
   callerOnL1: hexAddress.describe(
     'L1 address passed as caller_on_l1 in exit_to_l1_private (often the wrapper)',
   ),

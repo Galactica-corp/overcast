@@ -1,10 +1,10 @@
-import { Fr } from '@aztec/aztec.js/fields';
-import { GrumpkinScalar } from '@aztec/foundation/curves/grumpkin';
-import { type Logger, createLogger } from '@aztec/foundation/log';
+import { Fr } from '@aztec-labs/aztec.js/fields';
+import { GrumpkinScalar } from '@aztec-labs/foundation/curves/grumpkin';
+import { type Logger, createLogger } from '@aztec-labs/foundation/log';
 import { setupWallet } from './setup_wallet.js';
-import { AztecAddress } from '@aztec/aztec.js/addresses';
-import { AccountManager } from '@aztec/aztec.js/wallet';
-import { EmbeddedWallet } from '@aztec/wallets/embedded';
+import { AztecAddress } from '@aztec-labs/aztec.js/addresses';
+import { AccountManager, ContractInitializationStatus } from '@aztec-labs/aztec.js/wallet';
+import { EmbeddedWallet } from '@aztec-labs/wallets/embedded';
 import { getTimeouts } from '../../config/config.js';
 import { getFeePaymentMethodForTxFees, isAztecMainnetEnv } from './fpc.js';
 
@@ -38,14 +38,14 @@ async function deploySchnorrAccountWithKeys(
   const account = await activeWallet.createSchnorrAccount(secretKey, salt, signingKey);
   logger.info(`Account address will be: ${account.address}`);
 
-  const { isContractPublished, isContractInitialized } =
+  const { isContractPublished, initializationStatus } =
     await activeWallet.getContractMetadata(account.address);
-  // `isContractPublished` uses the node's public contract registry; `isContractInitialized`
+  // `isContractPublished` uses the node's public contract registry; `initializationStatus`
   // checks the siloed init nullifier. An account can be initialized (deploy tx landed) without
   // the former being set — redeploying would then fail with "Invalid tx: Existing nullifier".
   if (
     isContractPublished ||
-    isContractInitialized
+    initializationStatus === ContractInitializationStatus.INITIALIZED
   ) {
     logger.info(
       'Account already exists on the network (skipping deployment transaction).',
@@ -77,8 +77,11 @@ async function deploySchnorrAccountWithKeys(
   // Ensure PXE knows the account artifact so entrypoint dispatch can resolve selectors during simulation.
   await registerDeployedAccountWithPxe(activeWallet, account);
 
+  // Self-paid deploy goes through the multicall entrypoint. Sending `from` the account
+  // itself runs the Schnorr entrypoint, which cannot read `signing_public_key` until this
+  // constructor has landed.
   await deployMethod.send({
-    from: account.address,
+    from: 'NO_FROM',
     fee: { paymentMethod },
     wait: { timeout: timeouts.deployTimeout },
   });

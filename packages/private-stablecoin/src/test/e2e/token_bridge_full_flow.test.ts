@@ -1,8 +1,8 @@
-import { EthAddress } from '@aztec/aztec.js/addresses';
-import { SponsoredFeePaymentMethod } from '@aztec/aztec.js/fee';
-import { Fr } from '@aztec/aztec.js/fields';
-import { SponsoredFPCContractArtifact } from '@aztec/noir-contracts.js/SponsoredFPC';
-import { createLogger } from '@aztec/foundation/log';
+import { EthAddress } from '@aztec-labs/aztec.js/addresses';
+import { SponsoredFeePaymentMethod } from '@aztec-labs/aztec.js/fee';
+import { Fr } from '@aztec-labs/aztec.js/fields';
+import { SponsoredFPCContractArtifact } from '@aztec-labs/noir-contracts.js/SponsoredFPC';
+import { createLogger } from '@aztec-labs/foundation/log';
 
 import { PrivateStablecoinContract } from '../../artifacts/PrivateStablecoin.js';
 import { TokenBridgeContract } from '../../artifacts/TokenBridge.js';

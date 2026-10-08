@@ -5,8 +5,8 @@ Monorepo-wide rules (TDD, secrets, Noir hashing, MCP) live in [`AGENTS.md`](../.
 ## Setup
 
 - Use **Node.js 24**.
-- This repo uses **Yarn 4** from the **monorepo root**: `yarn install`. Do not substitute CDN-hosted packages for declared dependencies; use Yarn so `@aztec/*` versions stay aligned with the lockfile.
-- Install the **Aztec CLI** at the same version as **`Nargo.toml` git tag** and **`package.json` `@aztec/*` pins** (see [README.md](./README.md) version triangle).
+- This repo uses **Yarn 4** from the **monorepo root**: `yarn install`. Do not substitute CDN-hosted packages for declared dependencies; use Yarn so `@aztec-labs/*` versions stay aligned with the lockfile.
+- Install the **Aztec CLI** at the same version as **`Nargo.toml` git tag** and **`package.json` `@aztec-labs/*` pins** (see [README.md](./README.md) version triangle).
 - Start the local network before E2E: `aztec start --local-network`. Not required for `aztec compile` / `aztec test` (TXE) alone.
 - After **restarting** the local network, clear PXE data: `yarn clear-store` in this package or `rm -rf packages/private-stablecoin/store`.
 

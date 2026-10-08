@@ -1,8 +1,8 @@
 import { PrivateStablecoinContract } from '../src/artifacts/PrivateStablecoin.js';
 import { TokenBridgeContract } from '../src/artifacts/TokenBridge.js';
-import { EthAddress } from '@aztec/aztec.js/addresses';
-import { type Logger, createLogger } from '@aztec/foundation/log';
-import { Fr } from '@aztec/aztec.js/fields';
+import { EthAddress } from '@aztec-labs/aztec.js/addresses';
+import { type Logger, createLogger } from '@aztec-labs/foundation/log';
+import { Fr } from '@aztec-labs/aztec.js/fields';
 import { setupWallet } from '../src/utils/setup_wallet.js';
 import { deploySchnorrAccount } from '../src/utils/deploy_account.js';
 import { getTimeouts } from '../config/config.js';

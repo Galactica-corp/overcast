@@ -29,6 +29,7 @@ function normalizeBytes32Hex(s: string): `0x${string}` {
  */
 export function parseMembershipWitnessJson(raw: string): {
   epoch: bigint;
+  numCheckpointsInEpoch: bigint;
   leafIndex: bigint;
   path: readonly `0x${string}`[];
 } {
@@ -43,11 +44,15 @@ export function parseMembershipWitnessJson(raw: string): {
   }
   const o = parsed as Record<string, unknown>;
   const epochNumber = o.epochNumber ?? o.epoch;
+  const numCheckpointsInEpoch = o.numCheckpointsInEpoch;
   const leafIndex = o.leafIndex;
   const siblingPath = o.siblingPath;
 
   if (epochNumber === undefined) {
     throw new Error('witness must include epochNumber');
+  }
+  if (numCheckpointsInEpoch === undefined) {
+    throw new Error('witness must include numCheckpointsInEpoch');
   }
   if (leafIndex === undefined) {
     throw new Error('witness must include leafIndex');
@@ -57,6 +62,7 @@ export function parseMembershipWitnessJson(raw: string): {
   }
 
   const epoch = toBigIntFlexible(epochNumber);
+  const checkpoints = toBigIntFlexible(numCheckpointsInEpoch);
   const leaf = toBigIntFlexible(leafIndex);
 
   let pathRaw: unknown[];
@@ -79,5 +85,5 @@ export function parseMembershipWitnessJson(raw: string): {
     return normalizeBytes32Hex(p);
   });
 
-  return { epoch, leafIndex: leaf, path };
+  return { epoch, numCheckpointsInEpoch: checkpoints, leafIndex: leaf, path };
 }

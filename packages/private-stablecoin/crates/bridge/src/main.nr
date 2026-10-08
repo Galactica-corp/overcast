@@ -51,7 +51,7 @@ pub contract TokenBridge {
         // Consume message and emit nullifier
         self.context.consume_l1_to_l2_message(
             content_hash,
-            secret,
+            [secret],
             self.storage.portal.read(),
             message_leaf_index,
         );
@@ -91,7 +91,7 @@ pub contract TokenBridge {
         let content_hash = get_mint_to_private_content_hash(amount);
         self.context.consume_l1_to_l2_message(
             content_hash,
-            secret_for_L1_to_L2_message_consumption,
+            [secret_for_L1_to_L2_message_consumption],
             self.storage.portal.read(),
             message_leaf_index,
         );

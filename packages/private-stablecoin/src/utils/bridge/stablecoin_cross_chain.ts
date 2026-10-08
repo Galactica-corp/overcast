@@ -1,18 +1,18 @@
-import { EthAddress, AztecAddress } from '@aztec/aztec.js/addresses';
-import type { FeePaymentMethod } from '@aztec/aztec.js/fee';
-import { Fr } from '@aztec/aztec.js/fields';
-import { generateClaimSecret } from '@aztec/aztec.js/ethereum';
-import { waitForL1ToL2MessageReady } from '@aztec/aztec.js/messaging';
-import type { AztecNode } from '@aztec/aztec.js/node';
-import { extractEvent } from '@aztec/ethereum/utils';
-import type { ExtendedViemWalletClient } from '@aztec/ethereum/types';
-import { retryUntil } from '@aztec/foundation/retry';
-import { sha256ToField } from '@aztec/foundation/crypto/sha256';
-import { OutboxAbi } from '@aztec/l1-artifacts/OutboxAbi';
-import { computeL2ToL1MessageHash } from '@aztec/stdlib/hash';
-import { computeL2ToL1MembershipWitness } from '@aztec/stdlib/messaging';
-import { TxHash } from '@aztec/stdlib/tx';
-import type { EmbeddedWallet } from '@aztec/wallets/embedded';
+import { EthAddress, AztecAddress } from '@aztec-labs/aztec.js/addresses';
+import type { FeePaymentMethod } from '@aztec-labs/aztec.js/fee';
+import { Fr } from '@aztec-labs/aztec.js/fields';
+import { generateClaimSecret } from '@aztec-labs/aztec.js/ethereum';
+import { waitForL1ToL2MessageReady } from '@aztec-labs/aztec.js/messaging';
+import type { AztecNode } from '@aztec-labs/aztec.js/node';
+import { extractEvent } from '@aztec-labs/ethereum/utils';
+import type { ExtendedViemWalletClient } from '@aztec-labs/ethereum/types';
+import { retryUntil } from '@aztec-labs/foundation/retry';
+import { sha256ToField } from '@aztec-labs/foundation/crypto/sha256';
+import { OutboxAbi } from '@aztec-foundation/l1-artifacts/OutboxAbi';
+import { computeL2ToL1MessageHash } from '@aztec-labs/stdlib/hash';
+import { type L2ToL1MembershipWitness } from '@aztec-labs/stdlib/messaging';
+import { TxHash } from '@aztec-labs/stdlib/tx';
+import type { EmbeddedWallet } from '@aztec-labs/wallets/embedded';
 import type { Abi } from 'viem';
 import { encodeFunctionData, numberToHex, toFunctionSelector } from 'viem';
 
@@ -245,13 +245,14 @@ export async function mineTwoL2BlocksForInboxLag(opts: {
 }): Promise<void> {
   const portalEth = EthAddress.fromString(opts.tokenPortalL1);
   for (let i = 0; i < 2; i++) {
-    const deploy = TokenBridgeContract.deploy(opts.wallet, opts.l2Token, portalEth);
+    const deploy = TokenBridgeContract.deploy(opts.wallet, opts.l2Token, portalEth, {
+      salt: Fr.random(),
+      universalDeploy: true,
+    });
     await deploy.send({
       from: opts.from,
       fee: { paymentMethod: opts.sponsoredPaymentMethod },
       wait: { timeout: opts.txTimeout },
-      contractAddressSalt: Fr.random(),
-      universalDeploy: true,
     });
   }
 }
@@ -347,7 +348,7 @@ export async function waitForL2BlockProvenOnL1(
 ): Promise<void> {
   await retryUntil(
     async () => {
-      const proven = await node.getProvenBlockNumber();
+      const proven = await node.getBlockNumber('proven');
       return proven >= minBlockNumber ? true : undefined;
     },
     `L2 block ${minBlockNumber} proven on L1 (outbox root available)`,
@@ -365,10 +366,10 @@ export async function waitForL2ToL1MembershipWitness(
   l2TxHash: string,
   timeoutSeconds = 600,
   intervalSeconds = 2,
-): Promise<NonNullable<Awaited<ReturnType<typeof computeL2ToL1MembershipWitness>>>> {
+): Promise<L2ToL1MembershipWitness> {
   const txHash = TxHash.fromString(l2TxHash.startsWith('0x') ? l2TxHash : `0x${l2TxHash}`);
   const witness = await retryUntil(
-    async () => (await computeL2ToL1MembershipWitness(aztecNode, messageHash, txHash)) ?? undefined,
+    async () => (await aztecNode.getL2ToL1MembershipWitness(txHash, messageHash)) ?? undefined,
     'L2 to L1 membership witness',
     timeoutSeconds,
     intervalSeconds,
@@ -387,15 +388,24 @@ export async function withdrawStablecoinFromL2ToL1(opts: {
   amount: bigint;
   /** Same L1 address passed as `caller_on_l1` in `exit_to_l1_private`. */
   callerOnL1: `0x${string}`;
-  witness: NonNullable<Awaited<ReturnType<typeof computeL2ToL1MembershipWitness>>>;
+  witness: L2ToL1MembershipWitness;
 }): Promise<void> {
   const path = opts.witness.siblingPath
     .toBufferArray()
     .map((buf) => `0x${Buffer.from(buf).toString('hex')}` as `0x${string}`);
   const epoch = BigInt(String(opts.witness.epochNumber));
+  const numCheckpointsInEpoch = BigInt(opts.witness.numCheckpointsInEpoch);
   const txFrom = getWalletClientAddress(opts.l1Client);
   const chainId = String(await opts.l1Client.getChainId());
-  const withdrawArgs = [opts.recipient, opts.amount, opts.callerOnL1, epoch, opts.witness.leafIndex, path] as const;
+  const withdrawArgs = [
+    opts.recipient,
+    opts.amount,
+    opts.callerOnL1,
+    epoch,
+    numCheckpointsInEpoch,
+    opts.witness.leafIndex,
+    path,
+  ] as const;
   const withdrawData = encodeFunctionData({
     abi: opts.wrapperAbi,
     functionName: 'withdrawFromL2ToL1',
@@ -423,7 +433,7 @@ export async function withdrawStablecoinFromL2ToL1(opts: {
   logMarkdownComponentRawTransactionWithPermit('withdraw', {
     markdownComponentProps,
     notes: [
-      'The raw transaction is StablecoinWrapper.withdrawFromL2ToL1(recipient, amount, callerOnL1, epoch, leafIndex, siblingPath).',
+      'The raw transaction is StablecoinWrapper.withdrawFromL2ToL1(recipient, amount, callerOnL1, epoch, numCheckpointsInEpoch, leafIndex, siblingPath).',
       'There is no permit/approval step in the withdrawal flow, so the permit fields should be treated as empty or not-applicable by the MCP consumer.',
     ],
     withdrawArgs: {
@@ -431,6 +441,7 @@ export async function withdrawStablecoinFromL2ToL1(opts: {
       amount: opts.amount.toString(),
       callerOnL1: opts.callerOnL1,
       epoch: epoch.toString(),
+      numCheckpointsInEpoch: numCheckpointsInEpoch.toString(),
       leafIndex: opts.witness.leafIndex.toString(),
       siblingPath: path,
     },
